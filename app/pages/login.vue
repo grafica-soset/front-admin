@@ -3,6 +3,8 @@ import { type Account } from '@/utils/models'
 import { sessionStore } from "~/stores/sessionStore";
 
 const session = sessionStore()
+const router = useRouter()
+const route = useRoute()
 
 const account = ref<Account>({
   username: "test",
@@ -20,7 +22,7 @@ const performLogin = async () => {
 
   if(success) {
     session.login({username, token})
-    alert('Efetuou login')
+    await router.push( route.query.redirectTo ? String(route.query.redirectTo) : '/' )
   }else {
     alert('Cai fora')
   }
