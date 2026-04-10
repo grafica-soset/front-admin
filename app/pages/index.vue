@@ -1,6 +1,10 @@
 <script setup lang="ts">
-
+definePageMeta({
+  middleware: ['auth-verification'],
+})
 </script>
+
+
 
 <template>
   <div>

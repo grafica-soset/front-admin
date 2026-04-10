@@ -1,3 +1,18 @@
+<script setup>
+// Definição reativa do caminho do usuário
+import CardForm from "~/components/ui/CardForm.vue";
+
+const breadcrumbItems = [
+  { label: 'Ordens de Serviço', to: '/ordens-de-servico' },
+  { label: 'Nova Ordem' } // Sem "to", renderiza como texto atual
+]
+
+definePageMeta({
+  middleware: ['auth-verification'],
+})
+
+</script>
+
 <template>
   <div class="max-w-5xl mx-auto">
 
@@ -16,14 +31,4 @@
   </div>
 </template>
 
-<script setup>
-// Definição reativa do caminho do usuário
-import CardForm from "~/components/ui/CardForm.vue";
 
-const breadcrumbItems = [
-  { label: 'Ordens de Serviço', to: '/ordens-de-servico' },
-  { label: 'Nova Ordem' } // Sem "to", renderiza como texto atual
-]
-
-
-</script>
