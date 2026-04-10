@@ -7,7 +7,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['./app/assets/css/main.css'],
   modules: [
-      '@pinia/nuxt'
+      '@pinia/nuxt',
+      'pinia-plugin-persistedstate/nuxt',
   ],
   vite: {
     plugins: [

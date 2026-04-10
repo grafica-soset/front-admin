@@ -16,4 +16,5 @@ export const sessionStore = defineStore('session', {
             this.token = token;
         },
     },
+    persist: true,
 })
