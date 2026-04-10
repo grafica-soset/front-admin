@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { type Account } from '@/utils/models'
+
 const account = ref<Account>({} as Account)
 
 const performLogin = async () => {
   console.log("Efetuar o login")
+
+  const todo = await $fetch('/api/login', {
+    method: 'POST',
+    body: account.value,
+  })
 
 }
 
