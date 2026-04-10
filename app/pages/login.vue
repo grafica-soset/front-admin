@@ -1,15 +1,29 @@
 <script setup lang="ts">
 import { type Account } from '@/utils/models'
+import { sessionStore } from "~/stores/sessionStore";
 
-const account = ref<Account>({} as Account)
+const session = sessionStore()
+
+const account = ref<Account>({
+  username: "test",
+  password: "password1234",
+} as Account)
+
 
 const performLogin = async () => {
   console.log("Efetuar o login")
 
-  const todo = await $fetch('/api/login', {
+  const { success, message, token, username } = await $fetch('/api/login', {
     method: 'POST',
     body: account.value,
   })
+
+  if(success) {
+    session.login({username, token})
+    alert('Efetuou login')
+  }else {
+    alert('Cai fora')
+  }
 
 }
 
