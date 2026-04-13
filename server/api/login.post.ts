@@ -1,21 +1,28 @@
 import { type Account } from '@/utils/models'
 
+const config = useRuntimeConfig()
+
 export default defineEventHandler(async (event) => {
 
     const body: Account = await readBody(event)
 
     const {username, password} = body
 
-    // console.log("Servidor", username, password)
+    const {apiServer} = config
 
-    if( username == "test" && password == "password1234" ){
+    try{
+        const { token } = await $fetch(`${apiServer}/api/auth/login`, {
+            method: 'POST',
+            body
+        })
         return {
             success : true,
             message : 'Login successful',
-            token : "token-de-autenticacao-do-usuario",
-            username: "username-do-usuario"
+            token : token,
+            username: username
         }
-    }else{
+    }catch (e){
+        console.log("Authentication Error", e)
         return {
             success : false,
             message : 'Login invalido',
