@@ -8,7 +8,7 @@ const route = useRoute()
 
 const account = ref<Account>({
   username: "test",
-  password: "password1234",
+  password: "password123",
 } as Account)
 
 
