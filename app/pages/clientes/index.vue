@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 const session = sessionStore()
+const router = useRouter()
 
 const loading = ref(false)
 const search = ref("")
@@ -28,7 +29,7 @@ const searchCustomer = async () => {
 
 const selectCustomer = ({id}) => {
   console.log("Cliente selecionado:", id)
-  // Aqui você pode implementar a lógica para lidar com a seleção do cliente, como navegar para uma página de detalhes ou preencher um formulário
+  router.push(`/clientes/${id}`)
 }
 
 const totalCustomerFound = computed(() => customerList.value.length)
