@@ -14,6 +14,11 @@ onMounted(() => {
   <div class="max-w-5xl mx-auto">
     <h1>Detalhes do Cliente {{id}}</h1>
     <!-- Aqui você pode adicionar os detalhes do cliente usando o ID da rota -->
+
+
+    Listar os contatos
+    Listar as OS
+
   </div>
 </template>
 
