@@ -9,6 +9,8 @@ export default defineEventHandler(async (event) => {
 
     // remover este bloco quando o backend estiver rodando
     console.log("dados recebidos", customerData)
+   await new Promise(resolve => setTimeout(resolve, 2000));
+
     return {
         success: true,
         message: 'Cliente criado com sucesso',
