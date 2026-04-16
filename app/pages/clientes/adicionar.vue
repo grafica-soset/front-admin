@@ -11,8 +11,25 @@ const form = ref({
     name: '',
     officialName: '',
     document: '',
+    phone: '',
+    email: '',
+    whatsapp: '',
+    sector: '',
+    website: '',
+    inscrest: '',
+    inscrmun: '',
+    inscprodrur: '',
+    cei: '',
+    active: true,
+    zipcode: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
     state: '',
-    city: ''
+    accountantid: '',
+    salespersonid: ''
 })
 
 const handleSubmit = async () => {
@@ -40,7 +57,7 @@ const handleSubmit = async () => {
         <form @submit.prevent="handleSubmit">
 
             <div>
-                <label>Nome</label>
+                <label>Nome Fantasia</label>
                 <input type="text" v-model="form.name" />
             </div>
 
@@ -50,8 +67,88 @@ const handleSubmit = async () => {
             </div>
 
             <div>
-                <label>CNPJ/CPF</label>
+                <label>CPF / CNPJ</label>
                 <input type="text" v-model="form.document" />
+            </div>
+
+            <div>
+                <label>Telefone</label>
+                <input type="text" v-model="form.phone" />
+            </div>
+
+            <div>
+                <label>E-mail</label>
+                <input type="email" v-model="form.email" />
+            </div>
+
+            <div>
+                <label>WhatsApp</label>
+                <input type="text" v-model="form.whatsapp" />
+            </div>
+
+            <div>
+                <label>Segmento</label>
+                <input type="text" v-model="form.sector" />
+            </div>
+
+            <div>
+                <label>Website</label>
+                <input type="text" v-model="form.website" />
+            </div>
+
+            <div>
+                <label>Inscrição Estadual</label>
+                <input type="text" v-model="form.inscrest" />
+            </div>
+
+            <div>
+                <label>Inscrição Municipal</label>
+                <input type="text" v-model="form.inscrmun" />
+            </div>
+
+            <div>
+                <label>Inscrição Produtor Rural</label>
+                <input type="text" v-model="form.inscprodrur" />
+            </div>
+
+            <div>
+                <label>CEI</label>
+                <input type="text" v-model="form.cei" />
+            </div>
+
+            <div>
+                <label>Cliente Ativo</label>
+                <input type="checkbox" v-model="form.active" />
+            </div>
+
+            <div>
+                <label>CEP</label>
+                <input type="text" v-model="form.zipcode" />
+            </div>
+
+            <div>
+                <label>Rua</label>
+                <input type="text" v-model="form.street" />
+            </div>
+
+            <div>
+                <label>Número</label>
+                <input type="text" v-model="form.number" />
+            </div>
+
+            <div>
+                <label>Complemento</label>
+                <input type="text" v-model="form.complement" />
+            </div>
+
+            <div>
+                <label>Bairro</label>
+                <input type="text" v-model="form.neighborhood" />
+            </div>
+
+            <div>
+                <label>Cidade</label>
+                <input type="text" v-model="form.city" />
             </div>
 
             <div>
@@ -60,8 +157,13 @@ const handleSubmit = async () => {
             </div>
 
             <div>
-                <label>Cidade</label>
-                <input type="text" v-model="form.city" />
+                <label>Contador</label>
+                <input type="text" v-model="form.accountantid" />
+            </div>
+
+            <div>
+                <label>Vendedor</label>
+                <input type="text" v-model="form.salespersonid" />
             </div>
 
             <button type="submit" :disabled="loading">Salvar Cliente</button>
