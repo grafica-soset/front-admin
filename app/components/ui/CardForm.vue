@@ -1,13 +1,16 @@
 <script setup lang="ts">
+const emit = defineEmits(['submit'])
+
 const submitForm = () => {
   console.log('Enviando dados...')
+  emit('submitForm')
 }
 </script>
 
 <template>
   <form @submit.prevent="submitForm" class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl p-6 md:p-8">
 
-    <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+    <div>
       <slot />
     </div>
 
@@ -17,7 +20,3 @@ const submitForm = () => {
     </div>
   </form>
 </template>
-
-<style scoped>
-
-</style>
