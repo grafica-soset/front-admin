@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const emit = defineEmits(['submit'])
+const emit = defineEmits<{
+  (e: 'submitForm'): void
+}>()
 
 const submitForm = () => {
   console.log('Enviando dados...')
