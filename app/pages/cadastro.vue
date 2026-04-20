@@ -10,6 +10,8 @@ const form = ref({
   nome: '',
   email: '',
   tipoPessoa: 'fisica',
+  documento : '',
+  dataNascimento: '',
   categoria: null,
   observacoes: '',
   notificacoes: true
@@ -26,6 +28,9 @@ const onSubmit = () => {
   alert('Formulário enviado com sucesso! Verifique o console.')
 }
 
+useHead({
+  title: 'Tela de exemplo de cadastro'
+})
 </script>
 
 <template>
@@ -68,6 +73,33 @@ const onSubmit = () => {
             placeholder="joao@exemplo.com"
             required
           />
+        </div>
+
+        <!-- Documento e Data de Nascimento em Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="form-group mb-0">
+            <label for="documento" class="form-label">Documento (CPF/CNPJ)</label>
+            <span class="form-description">Número do documento para fins fiscais.</span>
+            <input
+              id="documento"
+              v-model="form.documento"
+              type="text"
+              class="form-input"
+              placeholder="000.000.000-00"
+              required
+            />
+          </div>
+
+          <div class="form-group mb-0">
+            <label for="dataNascimento" class="form-label">Data de Nascimento</label>
+            <span class="form-description">Apenas para clientes pessoa física.</span>
+            <input
+              id="dataNascimento"
+              v-model="form.dataNascimento"
+              type="date"
+              class="form-input"
+            />
+          </div>
         </div>
 
         <!-- Radio Group -->
@@ -135,17 +167,17 @@ const onSubmit = () => {
         <!-- Checkbox -->
         <div class="form-group border-t border-gray-100 pt-5 mt-2">
           <label class="form-checkbox-label">
-            <div class="form-checkbox-container">
+            <span class="form-checkbox-container">
               <input
                 type="checkbox"
                 v-model="form.notificacoes"
                 class="form-checkbox"
               />
-            </div>
-            <div class="form-checkbox-content">
+            </span>
+            <span class="form-checkbox-content">
               <span class="form-label mb-0">Receber notificações por SMS e WhatsApp</span>
               <span class="form-description">O cliente será alertado sobre mudanças de status da OS.</span>
-            </div>
+            </span>
           </label>
         </div>
 
