@@ -39,8 +39,8 @@ const onSubmit = () => {
       </template>
     </UiPageHeader>
 
-    <UiCardForm>
-      <form @submit.prevent="onSubmit" class="space-y-6">
+    <!-- Aqui no UiCardForm pega o evento que chamou no emits --->
+    <UiCardForm class="space-y-6" @submitForm="onSubmit">
 
         <!-- Input Text -->
         <div class="form-group">
@@ -149,14 +149,6 @@ const onSubmit = () => {
           </label>
         </div>
 
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="submit" class="btn-primary">
-            Salvar Cliente
-          </button>
-        </div>
-
-      </form>
     </UiCardForm>
 
   </div>
