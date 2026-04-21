@@ -40,6 +40,7 @@ const totalCustomerFound = computed(() => customerList.value.length)
   <div class="max-w-5xl mx-auto">
 
     Buscar cliente <input type="text" name="query" v-model="search" class="border" @keyup="searchCustomer" />
+    <NuxtLink to="/clientes/adicionar">Adicionar cliente</NuxtLink>
 
     <p>Total de clientes encontrados {{totalCustomerFound}}</p>
 
