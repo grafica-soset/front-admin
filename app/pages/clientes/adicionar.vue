@@ -93,127 +93,173 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-    <div>
-        <form @submit.prevent="handleSubmit">
+    <div class="max-w-5xl mx-auto">
 
-            <div>
-                <label>Nome Fantasia *</label>
-                <input type="text" v-model="form.name" />
-                <span v-if="errors.name" style="color: red; font-size: 0.85em;">{{ errors.name }}</span>
+        <UiBreadcrumb :items="[{ label: 'Clientes', to: '/clientes' }, { label: 'Adicionar cliente' }]" />
+
+        <UiPageHeader title="Adicionar cliente" />
+
+        <UiCardForm submit-label="Salvar Cliente" :loading="loading" @submitForm="handleSubmit" @cancel="router.push('/clientes')">
+
+            <!-- Identificação -->
+            <div class="form-section">
+                <h2 class="form-section-title">Identificação</h2>
+                <p class="form-section-desc">Dados principais do cliente</p>
+            </div>
+            <div class="form-section-body grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div class="form-group">
+                    <label class="form-label">Nome Fantasia <span class="text-red-500">*</span></label>
+                    <input type="text" v-model="form.name" placeholder="Ex: Empresa XPTO"
+                        :class="['form-input', errors.name && 'form-input-error']" />
+                    <p v-if="errors.name" class="form-error">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ errors.name }}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Razão Social</label>
+                    <input type="text" v-model="form.officialName" placeholder="Razão social completa" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CPF / CNPJ <span class="text-red-500">*</span></label>
+                    <input type="text" v-model="form.document" placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                        :class="['form-input', errors.document && 'form-input-error']" />
+                    <p v-if="errors.document" class="form-error">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ errors.document }}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Segmento</label>
+                    <input type="text" v-model="form.sector" placeholder="Ex: Tecnologia, Saúde..." class="form-input" />
+                </div>
+                <div class="form-group sm:col-span-2">
+                    <label class="form-label">Website</label>
+                    <input type="text" v-model="form.website" placeholder="https://exemplo.com.br" class="form-input" />
+                </div>
             </div>
 
-            <div>
-                <label>Razão Social</label>
-                <input type="text" v-model="form.officialName" />
+            <!-- Contato -->
+            <div class="form-section">
+                <h2 class="form-section-title">Contato</h2>
+            </div>
+            <div class="form-section-body grid grid-cols-1 gap-5 sm:grid-cols-3">
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" v-model="form.email" placeholder="contato@empresa.com.br"
+                        :class="['form-input', errors.email && 'form-input-error']" />
+                    <p v-if="errors.email" class="form-error">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ errors.email }}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" v-model="form.phone" placeholder="(00) 0000-0000"
+                        :class="['form-input', errors.phone && 'form-input-error']" />
+                    <p v-if="errors.phone" class="form-error">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ errors.phone }}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">WhatsApp</label>
+                    <input type="text" v-model="form.whatsapp" placeholder="(00) 00000-0000"
+                        :class="['form-input', errors.whatsapp && 'form-input-error']" />
+                    <p v-if="errors.whatsapp" class="form-error">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ errors.whatsapp }}
+                    </p>
+                </div>
             </div>
 
-            <div>
-                <label>CPF / CNPJ *</label>
-                <input type="text" v-model="form.document" />
-                <span v-if="errors.document" style="color: red; font-size: 0.85em;">{{ errors.document }}</span>
+            <!-- Dados Fiscais -->
+            <div class="form-section">
+                <h2 class="form-section-title">Dados Fiscais</h2>
+            </div>
+            <div class="form-section-body grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div class="form-group">
+                    <label class="form-label">Inscrição Estadual</label>
+                    <input type="text" v-model="form.inscrest" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Inscrição Municipal</label>
+                    <input type="text" v-model="form.inscrmun" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Inscrição Produtor Rural</label>
+                    <input type="text" v-model="form.inscprodrur" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CEI</label>
+                    <input type="text" v-model="form.cei" class="form-input" />
+                </div>
             </div>
 
-            <div>
-                <label>Telefone</label>
-                <input type="text" v-model="form.phone" />
-                <span v-if="errors.phone" style="color: red; font-size: 0.85em;">{{ errors.phone }}</span>
+            <!-- Endereço -->
+            <div class="form-section">
+                <h2 class="form-section-title">Endereço</h2>
+            </div>
+            <div class="form-section-body grid grid-cols-1 gap-5 sm:grid-cols-6">
+                <div class="form-group sm:col-span-2">
+                    <label class="form-label">CEP</label>
+                    <input type="text" v-model="form.zipcode" placeholder="00000-000"
+                        :class="['form-input', errors.zipcode && 'form-input-error']" />
+                    <p v-if="errors.zipcode" class="form-error">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        {{ errors.zipcode }}
+                    </p>
+                </div>
+                <div class="form-group sm:col-span-3">
+                    <label class="form-label">Rua</label>
+                    <input type="text" v-model="form.street" placeholder="Nome da rua, avenida..." class="form-input" />
+                </div>
+                <div class="form-group sm:col-span-1">
+                    <label class="form-label">Número</label>
+                    <input type="text" v-model="form.number" placeholder="Nº" class="form-input" />
+                </div>
+                <div class="form-group sm:col-span-3">
+                    <label class="form-label">Complemento</label>
+                    <input type="text" v-model="form.complement" placeholder="Apto, sala, bloco..." class="form-input" />
+                </div>
+                <div class="form-group sm:col-span-3">
+                    <label class="form-label">Bairro</label>
+                    <input type="text" v-model="form.neighborhood" class="form-input" />
+                </div>
+                <div class="form-group sm:col-span-4">
+                    <label class="form-label">Cidade</label>
+                    <input type="text" v-model="form.city" class="form-input" />
+                </div>
+                <div class="form-group sm:col-span-2">
+                    <label class="form-label">Estado</label>
+                    <input type="text" v-model="form.state" placeholder="SP" class="form-input" />
+                </div>
             </div>
 
-            <div>
-                <label>E-mail</label>
-                <input type="email" v-model="form.email" />
-                <span v-if="errors.email" style="color: red; font-size: 0.85em;">{{ errors.email }}</span>
+            <!-- Interno -->
+            <div class="form-section">
+                <h2 class="form-section-title">Interno</h2>
+                <p class="form-section-desc">Vínculos internos e status do cliente</p>
+            </div>
+            <div class="form-section-body grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div class="form-group">
+                    <label class="form-label">Contador</label>
+                    <input type="text" v-model="form.accountantid" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vendedor</label>
+                    <input type="text" v-model="form.salespersonid" class="form-input" />
+                </div>
             </div>
 
-            <div>
-                <label>WhatsApp</label>
-                <input type="text" v-model="form.whatsapp" />
-                <span v-if="errors.whatsapp" style="color: red; font-size: 0.85em;">{{ errors.whatsapp }}</span>
-            </div>
+            <template #footer-left>
+                <label class="form-checkbox-label">
+                    <input type="checkbox" v-model="form.active" class="form-checkbox" />
+                    Cliente Ativo
+                </label>
+            </template>
 
-            <div>
-                <label>Segmento</label>
-                <input type="text" v-model="form.sector" />
-            </div>
+        </UiCardForm>
 
-            <div>
-                <label>Website</label>
-                <input type="text" v-model="form.website" />
-            </div>
-
-            <div>
-                <label>Inscrição Estadual</label>
-                <input type="text" v-model="form.inscrest" />
-            </div>
-
-            <div>
-                <label>Inscrição Municipal</label>
-                <input type="text" v-model="form.inscrmun" />
-            </div>
-
-            <div>
-                <label>Inscrição Produtor Rural</label>
-                <input type="text" v-model="form.inscprodrur" />
-            </div>
-
-            <div>
-                <label>CEI</label>
-                <input type="text" v-model="form.cei" />
-            </div>
-
-            <div>
-                <label>Cliente Ativo</label>
-                <input type="checkbox" v-model="form.active" />
-            </div>
-
-            <div>
-                <label>CEP</label>
-                <input type="text" v-model="form.zipcode" />
-                <span v-if="errors.zipcode" style="color: red; font-size: 0.85em;">{{ errors.zipcode }}</span>
-            </div>
-
-            <div>
-                <label>Rua</label>
-                <input type="text" v-model="form.street" />
-            </div>
-
-            <div>
-                <label>Número</label>
-                <input type="text" v-model="form.number" />
-            </div>
-
-            <div>
-                <label>Complemento</label>
-                <input type="text" v-model="form.complement" />
-            </div>
-
-            <div>
-                <label>Bairro</label>
-                <input type="text" v-model="form.neighborhood" />
-            </div>
-
-            <div>
-                <label>Cidade</label>
-                <input type="text" v-model="form.city" />
-            </div>
-
-            <div>
-                <label>Estado</label>
-                <input type="text" v-model="form.state" />
-            </div>
-
-            <div>
-                <label>Contador</label>
-                <input type="text" v-model="form.accountantid" />
-            </div>
-
-            <div>
-                <label>Vendedor</label>
-                <input type="text" v-model="form.salespersonid" />
-            </div>
-
-            <button type="submit" :disabled="loading">Salvar Cliente</button>
-
-        </form>
     </div>
 </template>
