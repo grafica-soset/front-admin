@@ -1,6 +1,7 @@
 const config = useRuntimeConfig()
 
 export default defineEventHandler(async (event) => {
+  const id = getRouterParam(event, 'id')
   const body = await readBody(event)
   const { apiServer } = config
   const { token, officialName, street, neighborhood, zipcode, inscprodrur, salespersonid, accountantid, phone, email, whatsapp, number, complement, document, ...rest } = body
@@ -18,14 +19,14 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response = await $fetch(`${apiServer}/api/customer`, {
-      method: 'POST',
+    const response = await $fetch(`${apiServer}/api/customer/${id}`, {
+      method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
       body: customerData
     })
-    return { success: true, message: 'Cliente criado com sucesso', data: response }
+    return { success: true, data: response }
   } catch (e) {
-    console.log('Create Customer Error', e)
-    return { success: false, message: 'Erro ao criar cliente' }
+    console.log('Update Customer Error', e)
+    return { success: false, message: 'Erro ao atualizar cliente' }
   }
 })
