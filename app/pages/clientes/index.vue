@@ -8,31 +8,34 @@ const search = ref("")
 const customerList = ref<Customer[]>([])
 
 const searchCustomer = async () => {
-  if( search.value.length < 3 || loading.value) return
+  if (search.value.length < 3 || loading.value) return
 
   loading.value = true
 
-  const { success, list } = await $fetch('/api/customer/search', {
+  const { list } = await $fetch('/api/customer/search', {
     method: 'GET',
     query: {
-      search : search.value,
-      token : session.token
+      search: search.value,
+      token: session.token
     },
   }).finally(() => {
     loading.value = false
   })
 
-  if(list !=null ){
+  if (list != null) {
     customerList.value = list
   }
 }
 
-const selectCustomer = ({id}) => {
-  console.log("Cliente selecionado:", id)
+const selectCustomer = ({ id }) => {
   router.push(`/clientes/${id}`)
 }
 
-const totalCustomerFound = computed(() => customerList.value.length)
+const customerType = (doc: string) => {
+  const digits = doc?.replace(/\D/g, '') ?? ''
+  return digits.length === 14 ? 'Jurídica' : 'Física'
+}
+
 
 </script>
 
@@ -60,17 +63,34 @@ const totalCustomerFound = computed(() => customerList.value.length)
       </NuxtLink>
     </div>
 
-    <p class="text-sm text-gray-500 mb-3">Total de clientes encontrados: {{ totalCustomerFound }}</p>
+    <p class="text-sm text-gray-500 mb-3">Total de clientes encontrados: {{ customerList.length }}</p>
 
     <UiDatatable :items="customerList">
+
       <template #header>
-        <th class="px-4 py-3 font-medium">Razão Social</th>
+        <th class="py-3 px-4 font-semibold">Nome</th>
+        <th class="py-3 px-4 font-semibold">Documento</th>
+        <th class="py-3 px-4 font-semibold">Tipo</th>
+        <th class="py-3 px-4 font-semibold">Cidade</th>
       </template>
+
       <template #row="{ item }">
-        <td class="px-4 py-3 cursor-pointer hover:text-indigo-600 transition-colors" @click="selectCustomer(item)">
-          {{ item.officialName }}
+        <td class="py-3 px-4 font-medium text-gray-900 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">
+          {{ item.officialName || item.name }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">
+          {{ item.cnpj }}
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+            {{ customerType(item.cnpj) }}
+          </span>
+        </td>
+        <td class="py-3 px-4 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">
+          {{ item.city }}
         </td>
       </template>
+
     </UiDatatable>
 
   </div>
