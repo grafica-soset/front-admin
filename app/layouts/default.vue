@@ -20,7 +20,7 @@ const menuItems = [
     // Adicionado a propriedade children para criar o submenu
     children: [
       { name: 'Dashboard', path: '/clientes' },
-      { name: 'Listagem', path: '/clientes/listar' },
+      { name: 'Listagem', path: '/clientes/listagem' },
       { name: 'Novo Cliente', path: '/clientes/novo' }
     ]
   }

@@ -1,28 +1,33 @@
+<script setup>
+const pageBreadcrumbList = [{ label: 'Dashboard de Clientes', to: '/clientes' }, { label: 'Todos os clientes' }]
+
+
+const search = async () => {
+  alert('Buscar cliente')
+}
+
+</script>
+
 <template>
   <div class="p-6 md:p-8 bg-gray-50 min-h-screen font-sans w-full">
 
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       <div>
-        <nav class="flex text-sm text-gray-500 mb-1" aria-label="Breadcrumb">
-          <ol class="inline-flex items-center space-x-1 md:space-x-2">
-            <li class="inline-flex items-center hover:text-blue-600 cursor-pointer">Administrativo</li>
-            <li><span class="mx-2">/</span></li>
-            <li class="text-gray-900 font-medium">Clientes</li>
-          </ol>
-        </nav>
+        <UiBreadcrumb :items="pageBreadcrumbList" />
         <h1 class="text-2xl font-bold tracking-tight text-gray-900">Todos os Clientes</h1>
       </div>
-
-      <button class="py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
+      <UiButton color="blue" to="/clientes/novo">
+        <template #icon>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </template>
         Novo Cliente
-      </button>
+      </UiButton>
     </header>
 
     <section class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
-      <form class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <form @submit.prevent="search" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
 
         <div class="md:col-span-2">
           <label for="search-name" class="block text-sm font-medium text-gray-700 mb-1">Nome ou Razão Social</label>
@@ -57,12 +62,8 @@
         </div>
 
         <div class="md:col-span-4 flex justify-end gap-3 mt-2">
-          <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 transition-colors">
-            Limpar Filtros
-          </button>
-          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-900 focus:ring-2 focus:ring-gray-300 transition-colors">
-            Buscar
-          </button>
+          <UiButton type="reset">Limpar filtros</UiButton>
+          <UiButton color="black" type="submit">Buscar</UiButton>
         </div>
       </form>
     </section>
@@ -196,6 +197,7 @@
           </svg>
         </button>
       </nav>
+
     </div>
 
   </div>
