@@ -12,4 +12,5 @@ export interface Customer {
     cpf: string
     state: string
     city: string
+    active?: boolean
 }
