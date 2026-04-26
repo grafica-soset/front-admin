@@ -5,24 +5,7 @@ import { useRouter } from 'vue-router';
 
 const session = sessionStore()
 const router = useRouter()
-
-// Controle de estado para o menu no celular
-const isSidebarOpen = ref(false)
-
-// Controle de estado para os submenus abertos (guarda o nome do menu aberto)
-const openSubmenus = ref([])
-
-const toggleSubmenu = (menuName) => {
-  if (openSubmenus.value.includes(menuName)) {
-    // Se já está aberto, remove da lista (fecha)
-    openSubmenus.value = openSubmenus.value.filter(name => name !== menuName)
-  } else {
-    // Se está fechado, adiciona à lista (abre)
-    openSubmenus.value.push(menuName)
-  }
-}
-
-const isSubmenuOpen = (menuName) => openSubmenus.value.includes(menuName)
+const route = useRoute()
 
 // Definição dos itens de menu baseados no escopo do projeto
 const menuItems = [
@@ -43,11 +26,57 @@ const menuItems = [
   }
 ]
 
+
+// Controle de estado para o menu no celular
+const isSidebarOpen = ref(false)
+
+// Controle de estado para os submenus abertos (guarda o nome do menu aberto)
+const openSubmenus = ref([])
+
+const toggleSubmenu = (menuName) => {
+  if (openSubmenus.value.includes(menuName)) {
+    // Se já está aberto, remove da lista (fecha)
+    openSubmenus.value = openSubmenus.value.filter(name => name !== menuName)
+  } else {
+    // Se está fechado, adiciona à lista (abre)
+    openSubmenus.value.push(menuName)
+  }
+}
+
+const isSubmenuOpen = (menuName) => openSubmenus.value.includes(menuName)
+
+// 1. Função para verificar se o menu pai deve estar aberto/ativo baseado na URL
+const checkActiveSubmenu = () => {
+  menuItems.forEach(item => {
+    if (item.children) {
+      // Verifica se algum filho tem o path igual à rota atual
+      const hasActiveChild = item.children.some(child => child.path === route.path)
+      if (hasActiveChild && !openSubmenus.value.includes(item.name)) {
+        openSubmenus.value.push(item.name)
+      }
+    }
+  })
+}
+
+// Função auxiliar para destacar o botão pai se um filho estiver ativo
+const isParentActive = (item) => {
+  if (!item.children) return false
+  return item.children.some(child => child.path === route.path)
+}
+
 const logoff = async () => {
   console.log('Usuário deslogado')
   await session.logout()
   router.push('/login')
 }
+
+
+// 2. Executa a verificação ao montar o componente
+onMounted(() => {
+  checkActiveSubmenu()
+})
+
+
 </script>
 
 <template>
