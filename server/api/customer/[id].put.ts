@@ -25,8 +25,9 @@ export default defineEventHandler(async (event) => {
       body: customerData
     })
     return { success: true, data: response }
-  } catch (e) {
+  } catch (e: any) {
     console.log('Update Customer Error', e)
-    return { success: false, message: 'Erro ao atualizar cliente' }
+    const backendMessage = e?.data?.error || e?.data?.message
+    return { success: false, message: backendMessage || 'Erro ao atualizar cliente' }
   }
 })

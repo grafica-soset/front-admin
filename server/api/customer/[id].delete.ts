@@ -8,8 +8,7 @@ export default defineEventHandler(async (event) => {
   try {
     await $fetch(`${apiServer}/api/customer/${id}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-      body: {}
+      headers: { Authorization: `Bearer ${token}` }
     })
     return { success: true }
   } catch (e) {

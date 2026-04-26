@@ -24,8 +24,9 @@ export default defineEventHandler(async (event) => {
       body: customerData
     })
     return { success: true, message: 'Cliente criado com sucesso', data: response }
-  } catch (e) {
+  } catch (e: any) {
     console.log('Create Customer Error', e)
-    return { success: false, message: 'Erro ao criar cliente' }
+    const backendMessage = e?.data?.error || e?.data?.message
+    return { success: false, message: backendMessage || 'Erro ao criar cliente' }
   }
 })
