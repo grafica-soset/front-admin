@@ -97,7 +97,11 @@ const handleSubmit = async () => {
 
         <UiBreadcrumb :items="[{ label: 'Clientes', to: '/clientes' }, { label: 'Adicionar cliente' }]" />
 
-        <UiPageHeader title="Adicionar cliente" />
+        <UiPageHeader title="Adicionar cliente">
+            <template #instruction>
+                Preencha os dados abaixo para cadastrar um novo cliente. Apenas nome e CPF/CNPJ são obrigatórios — os demais campos podem ser preenchidos depois.
+            </template>
+        </UiPageHeader>
 
         <UiCardForm submit-label="Salvar Cliente" :loading="loading" @submitForm="handleSubmit" @cancel="router.push('/clientes')">
 
@@ -109,6 +113,7 @@ const handleSubmit = async () => {
             <div class="form-section-body grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div class="form-group">
                     <label class="form-label">Nome Fantasia <span class="text-red-500">*</span></label>
+                    <span class="form-description">Como o cliente é conhecido no mercado.</span>
                     <input type="text" v-model="form.name" placeholder="Ex: Empresa XPTO"
                         :class="['form-input', errors.name && 'form-input-error']" />
                     <p v-if="errors.name" class="form-error">
@@ -118,6 +123,7 @@ const handleSubmit = async () => {
                 </div>
                 <div class="form-group">
                     <label class="form-label">Razão Social</label>
+                    <span class="form-description">Nome completo conforme o contrato social.</span>
                     <input type="text" v-model="form.officialName" placeholder="Razão social completa" class="form-input" />
                 </div>
                 <div class="form-group">
@@ -254,8 +260,13 @@ const handleSubmit = async () => {
 
             <template #footer-left>
                 <label class="form-checkbox-label">
-                    <input type="checkbox" v-model="form.active" class="form-checkbox" />
-                    Cliente Ativo
+                    <span class="form-checkbox-container">
+                        <input type="checkbox" v-model="form.active" class="form-checkbox" />
+                    </span>
+                    <span class="form-checkbox-content">
+                        <span class="form-label mb-0">Cliente Ativo</span>
+                        <span class="form-description">Clientes inativos não aparecem nas buscas padrão.</span>
+                    </span>
                 </label>
             </template>
 
