@@ -57,6 +57,7 @@ onMounted(async () => {
     customer.value.document = state.cnpj ?? ''
     customer.value.city = state.city ?? ''
     customer.value.state = state.state ?? ''
+    customer.value.active = state.active ?? true
     pendingCustomer.value = null
   }
 
@@ -66,14 +67,21 @@ onMounted(async () => {
 
 const customerName = computed(() => customer.value.officialName || customer.value.name || `Cliente #${id}`)
 
+const saveError = ref('')
+
 const handleSave = async () => {
   loading.value = true
-  const { success } = await $fetch(`/api/customer/${id}`, {
+  saveError.value = ''
+  const { success, message } = await $fetch(`/api/customer/${id}`, {
     method: 'PUT',
     body: { ...customer.value, token: session.token }
   }).finally(() => loading.value = false)
 
-  if (success) editing.value = false
+  if (success) {
+    editing.value = false
+  } else {
+    saveError.value = message || 'Erro ao salvar'
+  }
 }
 
 const handleDelete = async () => {
@@ -101,13 +109,13 @@ const handleDelete = async () => {
           @click="showConfirmDelete = true"
           class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 transition-colors"
         >
-          Excluir
+          Desativar
         </button>
       </div>
     </div>
 
     <div v-if="showConfirmDelete" class="mb-6 flex items-center justify-between bg-red-50 border border-red-200 rounded-lg px-5 py-4">
-      <p class="text-sm text-red-700 font-medium">Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.</p>
+      <p class="text-sm text-red-700 font-medium">Tem certeza que deseja desativar este cliente?</p>
       <div class="flex gap-3 ml-4 shrink-0">
         <button @click="showConfirmDelete = false" class="text-sm font-semibold text-gray-600 hover:text-gray-800 transition-colors">Cancelar</button>
         <button
@@ -115,7 +123,7 @@ const handleDelete = async () => {
           :disabled="loading"
           class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 transition-colors disabled:opacity-50"
         >
-          {{ loading ? 'Excluindo...' : 'Confirmar' }}
+          {{ loading ? 'Desativando...' : 'Confirmar' }}
         </button>
       </div>
     </div>
@@ -264,13 +272,17 @@ const handleDelete = async () => {
         </div>
       </div>
 
+      <div v-if="saveError" class="mt-6 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        {{ saveError }}
+      </div>
+
       <div v-if="editing" class="mt-8 flex items-center justify-between border-t border-gray-100 pt-6">
         <label class="form-checkbox-label">
           <input type="checkbox" v-model="customer.active" class="form-checkbox" />
           Cliente Ativo
         </label>
         <div class="flex gap-4">
-          <button type="button" @click="editing = false" class="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">Cancelar</button>
+          <button type="button" @click="editing = false; saveError = ''" class="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors">Cancelar</button>
           <button
             type="button"
             @click="handleSave"
