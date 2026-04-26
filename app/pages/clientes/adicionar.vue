@@ -6,6 +6,7 @@ const router = useRouter()
 const token = session.token
 
 const loading = ref(false)
+const submitError = ref('')
 
 const errors = ref({
     name: '',
@@ -74,8 +75,9 @@ const form = ref({
 const handleSubmit = async () => {
     if (!validate()) return
     loading.value = true
+    submitError.value = ''
 
-    const { success } = await $fetch('/api/customer', {
+    const { success, message } = await $fetch('/api/customer', {
         method: 'POST',
         body: {
             ...form.value,
@@ -85,9 +87,11 @@ const handleSubmit = async () => {
         loading.value = false
     })
 
-   if (success) {
+    if (success) {
         router.push('/clientes')
-   }
+    } else {
+        submitError.value = message || 'Erro ao criar cliente'
+    }
 }
 
 </script>
@@ -256,6 +260,10 @@ const handleSubmit = async () => {
                     <label class="form-label">Vendedor</label>
                     <input type="text" v-model="form.salespersonid" class="form-input" />
                 </div>
+            </div>
+
+            <div v-if="submitError" class="mt-6 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {{ submitError }}
             </div>
 
             <template #footer-left>

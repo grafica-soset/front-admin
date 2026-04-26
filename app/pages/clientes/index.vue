@@ -80,7 +80,7 @@ const customerType = (doc: string) => {
     <UiDatatable :items="customerList">
 
       <template #header>
-        <th class="py-3 px-4 font-semibold">Nome / Razão Social</th>
+        <th class="py-3 px-4 font-semibold">Nome</th>
         <th class="py-3 px-4 font-semibold">Documento</th>
         <th class="py-3 px-4 font-semibold">Tipo</th>
         <th class="py-3 px-4 font-semibold">Cidade</th>
@@ -92,11 +92,11 @@ const customerType = (doc: string) => {
           {{ item.officialName || item.name }}
         </td>
         <td class="py-3 px-4 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">
-          {{ item.cnpj }}
+          {{ formatDocument(item.document) }}
         </td>
         <td class="py-3 px-4 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">
           <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-            {{ customerType(item.cnpj) }}
+            {{ customerType(item.document) }}
           </span>
         </td>
         <td class="py-3 px-4 whitespace-nowrap cursor-pointer" @click="selectCustomer(item)">

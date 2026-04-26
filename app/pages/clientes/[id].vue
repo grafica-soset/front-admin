@@ -36,14 +36,14 @@ const customer = ref({
 
 const pendingCustomer = useState<Customer | null>('pendingCustomer', () => null)
 
-const fetchCustomer = async (query: string) => {
+const fetchCustomer = async () => {
   const { success, data } = await $fetch(`/api/customer/${id}`, {
-    query: { query, token: session.token }
+    query: { token: session.token }
   })
   if (success && data) {
     customer.value.name = data.name ?? customer.value.name
     customer.value.officialName = data.officialName ?? customer.value.officialName
-    customer.value.document = data.cnpj ?? customer.value.document
+    customer.value.document = data.document ?? customer.value.document
     customer.value.city = data.city ?? customer.value.city
     customer.value.state = data.state ?? customer.value.state
   }
@@ -54,15 +54,14 @@ onMounted(async () => {
   if (state) {
     customer.value.name = state.name ?? ''
     customer.value.officialName = state.officialName ?? ''
-    customer.value.document = state.cnpj ?? ''
+    customer.value.document = state.document ?? ''
     customer.value.city = state.city ?? ''
     customer.value.state = state.state ?? ''
     customer.value.active = state.active ?? true
     pendingCustomer.value = null
   }
 
-  const searchTerm = customer.value.document || customer.value.name
-  if (searchTerm) await fetchCustomer(searchTerm)
+  await fetchCustomer()
 })
 
 const customerName = computed(() => customer.value.officialName || customer.value.name || `Cliente #${id}`)
