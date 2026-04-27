@@ -1,17 +1,16 @@
+<script setup>
+const breadcrumb = [
+  { label: 'Dashboard de Clientes', to: '/clientes' },
+  { label: 'Todos os Clientes', to: '/clientes/listagem' },
+  { label: 'Novo Cliente' }
+]
+</script>
 <template>
   <div class="p-6 md:p-8 bg-gray-50 min-h-screen font-sans w-full">
 
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       <div>
-        <nav class="flex text-sm text-gray-500 mb-1" aria-label="Breadcrumb">
-          <ol class="inline-flex items-center space-x-1 md:space-x-2">
-            <li class="inline-flex items-center hover:text-blue-600 cursor-pointer">Administrativo</li>
-            <li><span class="mx-2">/</span></li>
-            <li class="hover:text-blue-600 cursor-pointer">Clientes</li>
-            <li><span class="mx-2">/</span></li>
-            <li class="text-gray-900 font-medium">Novo Cliente</li>
-          </ol>
-        </nav>
+        <UiBreadcrumb :items="breadcrumb" />
         <h1 class="text-2xl font-bold tracking-tight text-gray-900">Cadastrar Cliente</h1>
         <p class="text-sm text-gray-500 mt-1">Preencha os dados abaixo para adicionar um novo cliente ao sistema.</p>
       </div>

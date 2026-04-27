@@ -1,3 +1,16 @@
+<script setup>
+const props = defineProps({
+  items: {
+    type: Array,
+    required: true,
+    // Exemplo do formato esperado: [{ label: 'Clientes', to: '/clientes' }, { label: 'Novo Cliente' }]
+  }
+})
+
+// Função auxiliar para descobrir se é o último item do array
+const isLast = (index) => index === props.items.length - 1
+</script>
+
 <template>
   <nav class="flex mb-6 text-sm text-gray-500" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -27,16 +40,3 @@
     </ol>
   </nav>
 </template>
-
-<script setup>
-const props = defineProps({
-  items: {
-    type: Array,
-    required: true,
-    // Exemplo do formato esperado: [{ label: 'Clientes', to: '/clientes' }, { label: 'Novo Cliente' }]
-  }
-})
-
-// Função auxiliar para descobrir se é o último item do array
-const isLast = (index) => index === props.items.length - 1
-</script>
