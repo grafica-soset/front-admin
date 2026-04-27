@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
 
     const query: Record<string, unknown> = {
         page: Number(page ?? 0),
-        size: Number(size ?? 26),
+        size: Number(size ?? 20),
     }
     if (name) query.name = name
     if (document) query.document = document
