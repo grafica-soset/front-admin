@@ -21,7 +21,10 @@ export default defineEventHandler(async (event) => {
             query
         })
         return { success: true, data: response }
-    } catch (e) {
+    } catch (e: any) {
+        if (e.statusCode === 401) {
+            throw e;
+        }
         return { success: false, data: null }
     }
 })

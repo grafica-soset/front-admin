@@ -34,7 +34,12 @@ const { data, status } = useFetch('/api/customer/listagem', {
     active: route.query.active || undefined,
     page: Number(route.query.page ?? 0),
     size: 20
-  }))
+  })),
+  onResponseError({ response }) {
+    if (response.status === 401) {
+      router.push({ path: '/login', query: { redirectTo: route.fullPath } })
+    }
+  }
 })
 
 const pageData = computed(() => data.value?.data ?? null)

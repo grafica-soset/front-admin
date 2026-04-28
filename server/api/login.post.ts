@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
             token : token,
             username: username
         }
-    }catch (e){
+    }catch (e: any){
         console.log("Authentication Error", e)
         return {
             success : false,

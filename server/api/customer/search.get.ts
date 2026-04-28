@@ -25,7 +25,10 @@ export default defineEventHandler(async (event) => {
             message : 'Clientes encontrados',
             list: response
         }
-    }catch (e){
+    }catch (e: any){
+        if (e.statusCode === 401) {
+            throw e;
+        }
         console.log("Fetch Customer Error", e)
         return {
             success : false,
