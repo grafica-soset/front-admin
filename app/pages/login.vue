@@ -4,11 +4,6 @@ import { type Account } from '@/utils/models'
 import { sessionStore } from "~/stores/sessionStore"
 import { useRouter, useRoute } from 'vue-router'
 
-// Desativa o layout padrão (sidebar) para a tela de login
-definePageMeta({
-  layout: false
-})
-
 const session = sessionStore()
 const router = useRouter()
 const route = useRoute()
@@ -63,6 +58,11 @@ onMounted(() => {
     account.value.username = session.savedUsername
     rememberMe.value = true
   }
+})
+
+// Desativa o layout padrão (sidebar) para a tela de login
+definePageMeta({
+  layout: false
 })
 </script>
 
