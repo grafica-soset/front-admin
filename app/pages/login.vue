@@ -23,14 +23,6 @@ const account = ref<Account>({
   password: "",
 } as Account)
 
-// Recupera o usuário salvo caso a opção "Lembrar-me" tenha sido usada
-onMounted(() => {
-  if (session.savedUsername) {
-    account.value.username = session.savedUsername
-    rememberMe.value = true
-  }
-})
-
 const performLogin = async () => {
   loading.value = true
   errorMessage.value = ''
@@ -64,6 +56,14 @@ const performLogin = async () => {
     loading.value = false
   }
 }
+
+// Recupera o usuário salvo caso a opção "Lembrar-me" tenha sido usada
+onMounted(() => {
+  if (session.savedUsername) {
+    account.value.username = session.savedUsername
+    rememberMe.value = true
+  }
+})
 </script>
 
 <template>
