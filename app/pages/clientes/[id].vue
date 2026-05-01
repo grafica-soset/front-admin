@@ -1,3 +1,102 @@
+<script setup>
+
+const route = useRoute()
+
+const customerId = computed(() => {
+  return parseInt(route.params.id)
+})
+
+const currentPage = computed(() => {
+  const page = route.query.page
+  return page ? parseInt(page) : 1
+})
+
+const data = ref({})
+const loading = ref(false)
+
+const activeTab = computed(() => {
+  return route.hash || '#enderecos'
+})
+
+const items = computed(() => {
+  const tabKey = activeTab.value.replace('#', '')
+  return data.value?.[tabKey]?.[currentPage.value] ?? []
+})
+
+const load = async () => {
+  if (import.meta.server) return
+
+  if (loading.value) return
+
+  const structure = activeTab.value.replace('#','')
+  const cachedPageData = data.value?.[structure]?.[currentPage.value]
+
+  // Verifica se já temos dados válidos cacheados para não fazer nova requisição
+  if (Array.isArray(cachedPageData) ? cachedPageData.length > 0 : Boolean(cachedPageData)) {
+    return
+  }
+
+  loading.value = true
+
+  try {
+    // Usando $fetch ao invés de useFetch
+    const responseValue = await $fetch(`/api/customer/${customerId.value}/${structure}`, {
+      query: {
+        // token: session.token,
+        page: Number(route.query.page ?? 1),
+        size: 20
+      }
+    })
+
+    // O $fetch já retorna o payload (corpo) da resposta direto, sem precisar de `.value`
+    const normalizedItems = Array.isArray(responseValue)
+        ? responseValue
+        : (Array.isArray(responseValue?.data) ? responseValue.data : [])
+
+    const pageKey = String(currentPage.value)
+    const existingStructure = data.value[structure] ?? {}
+
+    // Atualiza o reativo preservando o cache de outras abas e páginas
+    data.value = {
+      ...data.value,
+      [structure]: {
+        ...existingStructure,
+        [pageKey]: normalizedItems
+      }
+    }
+  } catch (error) {
+    // O $fetch dispara erro para status 4xx e 5xx, então capturamos no bloco catch
+    if (error.response?.status === 401) {
+      router.push({ path: '/login', query: { redirectTo: route.fullPath } })
+    } else {
+      console.error("Erro ao buscar os dados:", error)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+watch([currentPage, activeTab], async () => {
+  await load()
+}, { immediate: true })
+
+
+
+</script>
+
+<style scoped>
+@reference "@/assets/css/main.css";
+
+.button {
+  @apply border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap;
+}
+
+.active {
+  @apply font-bold border-b-2 border-blue-500 text-blue-600;
+}
+
+</style>
+
 <template>
   <div class="p-6 md:p-8 bg-gray-50 min-h-screen font-sans w-full">
 
@@ -41,27 +140,73 @@
       </div>
     </header>
 
+    <!--- Navegação --->
     <div class="border-b border-gray-200 mb-6">
       <nav class="flex space-x-8" aria-label="Tabs">
-        <button class="border-b-2 border-blue-500 text-blue-600 px-1 py-4 text-sm font-bold whitespace-nowrap">
+        <!--
+        <nuxt-link :to="{ hash: '#resumo' }" class="button" :class="{ active : activeTab === '#resumo' }">
           Resumo
-        </button>
-        <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+        </nuxt-link>
+        <nuxt-link :to="{ hash: '#ordem-de-servicos' }" class="button" :class="{ active : activeTab === '#ordem-de-servicos' }">
           Ordens de Serviço (45)
-        </button>
-        <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+        </nuxt-link>
+        <nuxt-link :to="{ hash: '#orcamentos' }" class="button" :class="{ active : activeTab === '#orcamentos' }">
           Orçamentos (12)
-        </button>
-        <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+        </nuxt-link>
+        -->
+        <nuxt-link :to="{ hash: '#enderecos' }" class="button"  :class="{ active : activeTab === '#enderecos' }">
           Endereços
-        </button>
-        <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+        </nuxt-link>
+        <nuxt-link :to="{ hash: '#contatos' }" class="button"  :class="{ active : activeTab === '#contatos' }">
           Contatos
-        </button>
+        </nuxt-link>
+        <nuxt-link :to="{ hash: '#cores' }" class="button"  :class="{ active : activeTab === '#cores' }">
+          Cores
+        </nuxt-link>
       </nav>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!--- Exibição --->
+
+
+    <div>
+
+      <UiDatatable :items="items">
+        <template #header>
+          <th class="py-3 px-4 font-semibold">#</th>
+          <th class="py-3 px-4 font-semibold">
+            <span v-if="activeTab === '#cores'">Cor</span>
+            <span v-if="activeTab === '#enderecos'">Endereço</span>
+            <span v-if="activeTab === '#contatos'">Contatos</span>
+          </th>
+          <th class="py-3 px-4 font-semibold text-right">Ações</th>
+        </template>
+        <template #row="{ item }">
+          <td class="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
+            {{ item.id }}
+          </td>
+          <td class="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">
+            {{ item.name }}
+          </td>
+
+          <td>Ações</td>
+        </template>
+      </UiDatatable>
+
+      <nav>
+        Você está na página {{ currentPage }}
+        <br/>
+        <nuxt-link :to="{  hash : activeTab, query: { page: currentPage-1 }}">Anterior</nuxt-link>
+        <br/>
+        <nuxt-link :to="{  hash : activeTab, query: { page: currentPage+1 }}">Próxima</nuxt-link>
+
+      </nav>
+
+
+    </div>
+
+
+    <div v-if="false" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       <div class="lg:col-span-1 space-y-6">
         <section class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
