@@ -12,6 +12,27 @@ export default defineEventHandler(async (event) => {
     if (document) query.document = document
     if (active !== undefined && active !== '') query.active = active
 
+
+    /**
+     * Return
+     *
+     * {
+     *     "items": [
+     *         {
+     *             "id": 12368,
+     *             "name": "",
+     *             "officialName": "14ª Batalhão de Polícia Militar do Interior",
+     *             "document": "",
+     *             "state": "SP",
+     *             "city": "Registro"
+     *         },
+     *     ],
+     *     "totalItems": 12144,
+     *     "totalPages": 608,
+     *     "currentPage": 0,
+     *     "pageSize": 20
+     * }
+     */
     try {
         const response = await $fetch(`${apiServer}/api/customer`, {
             method: 'GET',
