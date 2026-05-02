@@ -1,39 +1,43 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { sessionStore as useSessionStore } from '~/stores/sessionStore'
 
-// Estado do componente
+const props = withDefaults(defineProps<{
+  endpoint: string
+  placeholder?: string
+  labelKey?: string
+  secondaryLabelKey?: string
+  subLabelKey?: string
+  statusKey?: string
+  activeStatusValue?: string
+  resultKey?: string
+}>(), {
+  placeholder: 'Buscar...',
+  labelKey: 'name',
+  resultKey: 'list',
+  activeStatusValue: 'Ativo',
+})
+
+const emit = defineEmits<{
+  select: [item: any]
+}>()
+
+const sessionStore = useSessionStore()
+
 const query = ref('')
 const results = ref<any[]>([])
 const isOpen = ref(false)
 const isLoading = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 
-// ------------------------------------------------------------------------
-// SIMULAÇÃO DE BANCO DE DADOS E API (Substitua pela sua chamada real depois)
-// ------------------------------------------------------------------------
-const mockDatabase = [
-  { id: 1, nome: 'Gráfica Exemplo Ltda', documento: '00.000.000/0001-00', status: 'Ativo' },
-  { id: 2, nome: 'Papelaria Central', documento: '11.111.111/0001-11', status: 'Ativo' },
-  { id: 3, nome: 'João da Silva ME', documento: '222.222.222-22', status: 'Inativo' },
-  { id: 4, nome: 'Editora Saber', documento: '33.333.333/0001-33', status: 'Ativo' },
-]
-
-const fetchClients = async (search: string) => {
-  // Simulando o tempo de resposta de uma API (500ms)
-  return new Promise<any[]>((resolve) => {
-    setTimeout(() => {
-      const filtered = mockDatabase.filter(c =>
-          c.nome.toLowerCase().includes(search.toLowerCase()) ||
-          c.documento.includes(search)
-      )
-      resolve(filtered)
-    }, 500)
-  })
-}
-// ------------------------------------------------------------------------
-
-// Lógica de Debounce (Evita chamar a API a cada letra digitada)
 let timeout: ReturnType<typeof setTimeout>
+
+const fetchResults = async (search: string) => {
+  const data = await $fetch<Record<string, any>>(props.endpoint, {
+    query: { search, token: sessionStore.token }
+  })
+  return data[props.resultKey!] ?? []
+}
 
 watch(query, (newValue) => {
   if (!newValue) {
@@ -46,27 +50,18 @@ watch(query, (newValue) => {
   isLoading.value = true
   clearTimeout(timeout)
 
-  // Aguarda 300ms após o usuário parar de digitar para buscar
   timeout = setTimeout(async () => {
-    results.value = await fetchClients(newValue)
+    results.value = await fetchResults(newValue)
     isLoading.value = false
   }, 300)
 })
 
-// Lógica para selecionar o cliente e navegar
-const selectClient = (client: any) => {
-  query.value = '' // Limpa o input
+const selectItem = (item: any) => {
+  query.value = ''
   isOpen.value = false
-
-  // No Nuxt, você usaria o navigateTo para ir para a tela de detalhes:
-  // navigateTo(`/clientes/${client.id}`)
-
-  // Apenas para logar no console por enquanto:
-  console.log('Navegando para o cliente:', client.nome)
-  alert(`Redirecionando para detalhes de: ${client.nome}`)
+  emit('select', item)
 }
 
-// Lógica para fechar o dropdown ao clicar fora dele
 const handleClickOutside = (event: MouseEvent) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     isOpen.value = false
@@ -91,7 +86,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
           v-model="query"
           @focus="query.length > 0 && (isOpen = true)"
           type="text"
-          placeholder="Buscar cliente (Nome, CNPJ)..."
+          :placeholder="placeholder"
           class="w-full pl-10 pr-10 py-2.5 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow shadow-sm outline-none"
       >
 
@@ -121,26 +116,30 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 
         <ul v-else-if="results.length > 0" class="max-h-64 overflow-y-auto divide-y divide-gray-100">
           <li
-              v-for="client in results"
-              :key="client.id"
-              @click="selectClient(client)"
+              v-for="item in results"
+              :key="item.id"
+              @click="selectItem(item)"
               class="p-3 hover:bg-blue-50 cursor-pointer transition-colors flex flex-col gap-0.5"
           >
-            <div class="flex justify-between items-center">
-              <span class="text-sm font-bold text-gray-900">{{ client.nome }}</span>
+            <div class="flex justify-between items-start">
+              <div class="flex flex-col gap-0.5">
+                <span class="text-sm font-bold text-gray-900">{{ item[labelKey!] }}</span>
+                <span v-if="secondaryLabelKey && item[secondaryLabelKey]" class="text-xs text-gray-600">{{ item[secondaryLabelKey] }}</span>
+              </div>
               <span
-                  class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full"
-                  :class="client.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                  v-if="statusKey && item[statusKey]"
+                  class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shrink-0 ml-2"
+                  :class="item[statusKey] === activeStatusValue ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
               >
-                {{ client.status }}
+                {{ item[statusKey] }}
               </span>
             </div>
-            <span class="text-xs text-gray-500 font-mono">{{ client.documento }}</span>
+            <span v-if="subLabelKey" class="text-xs text-gray-500 font-mono">{{ item[subLabelKey] }}</span>
           </li>
         </ul>
 
         <div v-else class="p-4 text-sm text-gray-500 text-center">
-          Nenhum cliente encontrado com "<span class="font-bold">{{ query }}</span>"
+          Nenhum resultado encontrado para "<span class="font-bold">{{ query }}</span>"
         </div>
       </div>
     </Transition>

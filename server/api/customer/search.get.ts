@@ -10,7 +10,22 @@ export default defineEventHandler(async (event) => {
     console.log("Busccar cliente ", search)
 
     try{
-        const response = await $fetch(`${apiServer}/api/customer`, {
+
+
+        /**
+         * Response example:
+         * [
+         *     {
+         *         "id": 18149,
+         *         "name": "",
+         *         "officialName": "Johnata Dendeveiz e Waltineia de Oliveira",
+         *         "document": "18.893.898/0001-30",
+         *         "state": "Pariquera-Açu",
+         *         "city": "Pariquera-Açu"
+         *     }
+         * ]
+         */
+        const response = await $fetch(`${apiServer}/api/customer/fulltext`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import SearchDropdown from "~/components/ui/SearchDropdown.vue";
+const handleClientSelect = (client: any) => {
+  navigateTo(`/clientes/${client.id}`)
+}
 </script>
 <template>
   <div class="p-6 md:p-8 bg-gray-50 min-h-screen font-sans w-full">
@@ -11,7 +13,14 @@ import SearchDropdown from "~/components/ui/SearchDropdown.vue";
       </div>
 
       <div class="w-full md:w-96">
-        <UiSearchDropdown />
+        <UiSearchDropdown
+            endpoint="/api/customer/search"
+            placeholder="Buscar cliente (Nome, CNPJ)..."
+            label-key="officialName"
+            secondary-label-key="name"
+            sub-label-key="document"
+            @select="handleClientSelect"
+        />
       </div>
     </header>
 
