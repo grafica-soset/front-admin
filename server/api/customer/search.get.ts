@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
         return {
             success : true,
             message : 'Clientes encontrados',
-            list: response
+            list: response.items
         }
     }catch (e: any){
         if (e.statusCode === 401) {
