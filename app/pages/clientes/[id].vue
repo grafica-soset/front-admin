@@ -1,15 +1,16 @@
+<script setup>
+
+const pageBreadcrumbList = [
+  { label: 'Dashboard de clientes', to: '/clientes' },
+  { label: 'Listagem', to: '/clientes/listagem' },
+  { label: 'Detalhar' },
+]
+
+</script>
 <template>
   <div class="p-6 md:p-8 bg-gray-50 min-h-screen font-sans w-full">
 
-    <nav class="flex text-sm text-gray-500 mb-4" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-2">
-        <li class="inline-flex items-center hover:text-blue-600 cursor-pointer">Administrativo</li>
-        <li><span class="mx-2">/</span></li>
-        <li class="hover:text-blue-600 cursor-pointer">Clientes</li>
-        <li><span class="mx-2">/</span></li>
-        <li class="text-gray-900 font-medium">Detalhes do Cliente</li>
-      </ol>
-    </nav>
+    <UiBreadcrumb :items="pageBreadcrumbList" />
 
     <header class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -25,7 +26,7 @@
               </span>
             </div>
             <p class="text-sm text-gray-500 mt-1">
-              <span class="font-mono">CNPJ: 00.000.000/0001-00</span> • Cliente desde Jan/2024
+              <span class="font-mono">CNPJ: 00.000.000/0001-00</span>
             </p>
           </div>
         </div>
@@ -34,29 +35,43 @@
           <button class="flex-1 md:flex-none px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors">
             Editar Dados
           </button>
+          <!--
           <button class="flex-1 md:flex-none px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
             Novo Orçamento / OS
           </button>
+          -->
         </div>
       </div>
     </header>
 
     <div class="border-b border-gray-200 mb-6">
       <nav class="flex space-x-8" aria-label="Tabs">
+        <!-- Neste momento não vamos trabalhar o resumo -->
         <button class="border-b-2 border-blue-500 text-blue-600 px-1 py-4 text-sm font-bold whitespace-nowrap">
           Resumo
         </button>
+        <!-- Neste momento não vamos listar ordem de servicos -->
+        <!--
         <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
           Ordens de Serviço (45)
         </button>
+        -->
+        <!-- Neste momento não vamos listar orçamentos -->
+        <!--
         <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
           Orçamentos (12)
         </button>
+        -->
+        <!--
         <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
           Endereços
         </button>
+        -->
         <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
           Contatos
+        </button>
+        <button class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-sm font-medium whitespace-nowrap">
+          Cores
         </button>
       </nav>
     </div>
@@ -75,13 +90,10 @@
               <dt class="text-xs text-gray-500">Telefone</dt>
               <dd class="text-sm font-medium text-gray-900">(11) 3333-4444</dd>
             </div>
-            <div>
-              <dt class="text-xs text-gray-500">Responsável</dt>
-              <dd class="text-sm font-medium text-gray-900">Marcos Oliveira</dd>
-            </div>
           </dl>
         </section>
 
+        <!--
         <section class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Resumo Financeiro</h3>
           <div class="space-y-3">
@@ -95,9 +107,11 @@
             </div>
           </div>
         </section>
+        -->
       </div>
 
       <div class="lg:col-span-2 space-y-6">
+        <!--
         <section class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Últimas Movimentações</h3>
@@ -158,6 +172,7 @@
             </ul>
           </div>
         </section>
+        -->
       </div>
 
     </div>
