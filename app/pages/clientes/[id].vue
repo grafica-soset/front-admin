@@ -86,6 +86,87 @@ function selectTab(tab: Tab) {
   if (tab === 'contatos' && !contactsLoaded.value) loadContacts()
   if (tab === 'cores' && !inksLoaded.value) loadInks()
 }
+
+// ── Edit modal ────────────────────────────────────────────────────────────────
+const showEditModal = ref(false)
+const saving = ref(false)
+const saveError = ref('')
+
+const form = reactive({
+  name: '',
+  officialname: '',
+  document: '',
+  sector: '',
+  website: '',
+  active: true,
+  // address — backend uses different field names on PUT vs GET
+  street: '',
+  number: '',
+  complement: '',
+  neighborhood: '',
+  city: '',
+  state: '',
+  zipcode: '',
+  country: '',
+  // fiscal
+  inscrest: '',
+  inscrmun: '',
+  inscrprodrur: '',
+  cei: '',
+  salespersonid: null as number | null,
+  accountantid: null as number | null,
+})
+
+function openEditModal() {
+  const c = customer.value
+  if (!c) return
+  form.name = c.name ?? ''
+  form.officialname = c.officialname ?? ''
+  form.document = c.document ?? ''
+  form.sector = c.sector ?? ''
+  form.website = c.website ?? ''
+  form.active = c.active ?? true
+  // GET uses address/district/postalcode, PUT expects street/neighborhood/zipcode
+  form.street = c.address ?? ''
+  form.number = c.number ?? ''
+  form.complement = c.complement ?? ''
+  form.neighborhood = c.district ?? ''
+  form.city = c.city ?? ''
+  form.state = c.state ?? ''
+  form.zipcode = c.postalcode ?? ''
+  form.country = c.country ?? ''
+  form.inscrest = c.inscrest ?? ''
+  form.inscrmun = c.inscrmun ?? ''
+  form.inscrprodrur = c.inscrprodrur ?? ''
+  form.cei = c.cei ?? ''
+  form.salespersonid = c.salespersonid ?? null
+  form.accountantid = c.accountantid ?? null
+  saveError.value = ''
+  showEditModal.value = true
+}
+
+async function saveCustomer() {
+  saving.value = true
+  saveError.value = ''
+  try {
+    const res = await $fetch<any>(`/api/customer/${id}`, {
+      method: 'PUT',
+      query: { token: store.token },
+      body: { ...form },
+    })
+    if (res.success) {
+      // Refresh the displayed customer data
+      customerRes.value = res
+      showEditModal.value = false
+    } else {
+      saveError.value = res.message || 'Erro ao salvar. Tente novamente.'
+    }
+  } catch {
+    saveError.value = 'Erro ao salvar. Tente novamente.'
+  } finally {
+    saving.value = false
+  }
+}
 </script>
 
 <template>
@@ -121,22 +202,20 @@ function selectTab(tab: Tab) {
                 </span>
               </div>
               <p v-if="tradeName" class="text-sm text-gray-500 mt-0.5">{{ tradeName }}</p>
-              <p class="text-sm text-gray-500 mt-0.5 font-mono" v-if="customer.document">
-                {{ customer.document }}
-              </p>
-              <p class="text-xs text-gray-400 mt-0.5" v-if="customer.city || customer.state">
+              <p v-if="customer.document" class="text-sm text-gray-500 mt-0.5 font-mono">{{ customer.document }}</p>
+              <p v-if="customer.city || customer.state" class="text-xs text-gray-400 mt-0.5">
                 {{ [customer.city, customer.state].filter(Boolean).join(' — ') }}
               </p>
             </div>
           </div>
 
           <div class="flex gap-3 w-full md:w-auto">
-            <NuxtLink
-              :to="`/clientes/${id}/editar`"
-              class="flex-1 md:flex-none px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors text-center"
+            <button
+              @click="openEditModal"
+              class="flex-1 md:flex-none px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors"
             >
               Editar Dados
-            </NuxtLink>
+            </button>
           </div>
         </div>
       </header>
@@ -245,20 +324,17 @@ function selectTab(tab: Tab) {
 
       <!-- Tab: Contatos -->
       <div v-if="activeTab === 'contatos'">
-
         <div v-if="contactsLoading" class="flex justify-center items-center py-16">
           <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </div>
-
         <template v-else>
           <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div v-if="contacts.length === 0" class="p-12 text-center text-sm text-gray-500">
               Nenhum contato cadastrado.
             </div>
-
             <table v-else class="w-full text-sm text-left">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -280,45 +356,27 @@ function selectTab(tab: Tab) {
               </tbody>
             </table>
           </div>
-
-          <!-- Paginação contatos -->
           <div v-if="contactsTotalPages > 1" class="flex justify-center items-center gap-2 mt-6">
-            <button
-              @click="loadContacts(contactsPage - 1)"
-              :disabled="contactsPage === 0"
-              class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors"
-            >
-              Anterior
-            </button>
+            <button @click="loadContacts(contactsPage - 1)" :disabled="contactsPage === 0" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors">Anterior</button>
             <span class="text-sm text-gray-600">{{ contactsPage + 1 }} / {{ contactsTotalPages }}</span>
-            <button
-              @click="loadContacts(contactsPage + 1)"
-              :disabled="contactsPage + 1 >= contactsTotalPages"
-              class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors"
-            >
-              Próximo
-            </button>
+            <button @click="loadContacts(contactsPage + 1)" :disabled="contactsPage + 1 >= contactsTotalPages" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors">Próximo</button>
           </div>
         </template>
-
       </div>
 
       <!-- Tab: Cores -->
       <div v-if="activeTab === 'cores'">
-
         <div v-if="inksLoading" class="flex justify-center items-center py-16">
           <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </div>
-
         <template v-else>
           <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div v-if="inks.length === 0" class="p-12 text-center text-sm text-gray-500">
               Nenhuma cor cadastrada.
             </div>
-
             <table v-else class="w-full text-sm text-left">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -334,35 +392,154 @@ function selectTab(tab: Tab) {
               </tbody>
             </table>
           </div>
-
-          <!-- Paginação cores -->
           <div v-if="inksTotalPages > 1" class="flex justify-center items-center gap-2 mt-6">
-            <button
-              @click="loadInks(inksPage - 1)"
-              :disabled="inksPage === 0"
-              class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors"
-            >
-              Anterior
-            </button>
+            <button @click="loadInks(inksPage - 1)" :disabled="inksPage === 0" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors">Anterior</button>
             <span class="text-sm text-gray-600">{{ inksPage + 1 }} / {{ inksTotalPages }}</span>
-            <button
-              @click="loadInks(inksPage + 1)"
-              :disabled="inksPage + 1 >= inksTotalPages"
-              class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors"
-            >
-              Próximo
-            </button>
+            <button @click="loadInks(inksPage + 1)" :disabled="inksPage + 1 >= inksTotalPages" class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-100 transition-colors">Próximo</button>
           </div>
         </template>
-
       </div>
 
     </template>
 
-    <!-- Erro ao carregar -->
     <div v-else-if="!customerLoading" class="mt-8 text-center text-sm text-gray-500">
       Cliente não encontrado.
     </div>
+
+    <!-- ── Modal de edição ───────────────────────────────────────────────────── -->
+    <UiModal :open="showEditModal" title="Editar Cliente" size="xl" @close="showEditModal = false">
+
+      <form @submit.prevent="saveCustomer" id="form-edit-customer">
+
+        <!-- Dados Gerais -->
+        <fieldset class="mb-6">
+          <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Dados Gerais</legend>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">Razão Social</label>
+              <input v-model="form.officialname" type="text" class="form-input" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">Nome Fantasia</label>
+              <input v-model="form.name" type="text" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CNPJ / CPF</label>
+              <input v-model="form.document" type="text" class="form-input font-mono" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Setor</label>
+              <input v-model="form.sector" type="text" class="form-input" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">Website</label>
+              <input v-model="form.website" type="url" class="form-input" placeholder="https://" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-checkbox-label cursor-pointer">
+                <div class="form-checkbox-container">
+                  <input v-model="form.active" type="checkbox" class="form-checkbox" />
+                </div>
+                <div class="form-checkbox-content">
+                  <span class="form-label">Cliente Ativo</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Endereço -->
+        <fieldset class="mb-6">
+          <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Endereço</legend>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="form-group sm:col-span-3">
+              <label class="form-label">Logradouro</label>
+              <input v-model="form.street" type="text" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Número</label>
+              <input v-model="form.number" type="text" class="form-input" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">Complemento</label>
+              <input v-model="form.complement" type="text" class="form-input" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">Bairro</label>
+              <input v-model="form.neighborhood" type="text" class="form-input" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">Cidade</label>
+              <input v-model="form.city" type="text" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estado</label>
+              <input v-model="form.state" type="text" class="form-input" maxlength="2" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CEP</label>
+              <input v-model="form.zipcode" type="text" class="form-input font-mono" />
+            </div>
+            <div class="form-group sm:col-span-2">
+              <label class="form-label">País</label>
+              <input v-model="form.country" type="text" class="form-input" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Dados Fiscais -->
+        <fieldset>
+          <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Dados Fiscais</legend>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label">Inscrição Estadual</label>
+              <input v-model="form.inscrest" type="text" class="form-input font-mono" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Inscrição Municipal</label>
+              <input v-model="form.inscrmun" type="text" class="form-input font-mono" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Inscrição Prod. Rural</label>
+              <input v-model="form.inscrprodrur" type="text" class="form-input font-mono" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">CEI</label>
+              <input v-model="form.cei" type="text" class="form-input font-mono" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Erro -->
+        <p v-if="saveError" class="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+          {{ saveError }}
+        </p>
+
+      </form>
+
+      <template #footer>
+        <button
+          type="button"
+          @click="showEditModal = false"
+          class="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          form="form-edit-customer"
+          :disabled="saving"
+          class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center gap-2"
+        >
+          <svg v-if="saving" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ saving ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </template>
+
+    </UiModal>
 
   </div>
 </template>
