@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, onUnmounted } from 'vue'
+import { watch, onMounted, onUnmounted } from 'vue'
 
 const props = withDefaults(defineProps<{
   open: boolean
@@ -23,14 +23,20 @@ const sizeClass = computed(() => ({
 const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && props.open) emit('close')
 }
-window.addEventListener('keydown', onKey)
+
+onMounted(() => {
+  window.addEventListener('keydown', onKey)
+})
+
 onUnmounted(() => {
   window.removeEventListener('keydown', onKey)
   document.body.style.overflow = ''
 })
 
 watch(() => props.open, (val) => {
-  document.body.style.overflow = val ? 'hidden' : ''
+  if (import.meta.client) {
+    document.body.style.overflow = val ? 'hidden' : ''
+  }
 })
 </script>
 
