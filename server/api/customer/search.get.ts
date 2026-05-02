@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
          *     }
          * ]
          */
-        const response = await $fetch(`${apiServer}/api/customer`, {
+        const response = await $fetch(`${apiServer}/api/customer/fulltext`, {
             method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
         return {
             success : true,
             message : 'Clientes encontrados',
-            list: response.items
+            list: response
         }
     }catch (e: any){
         if (e.statusCode === 401) {
