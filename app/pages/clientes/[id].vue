@@ -14,7 +14,7 @@ const pageBreadcrumbList = [
 ]
 
 // ── Customer ──────────────────────────────────────────────────────────────────
-const { data: customerRes, pending: customerLoading } = await useFetch<any>(
+const { data: customerRes, pending: customerLoading, refresh: refreshCustomer } = await useFetch<any>(
   `/api/customer/${id}`,
   { query: { token: store.token } }
 )
@@ -155,14 +155,13 @@ async function saveCustomer() {
       body: { ...form },
     })
     if (res.success) {
-      // Refresh the displayed customer data
-      customerRes.value = res
+      await refreshCustomer()
       showEditModal.value = false
     } else {
       saveError.value = res.message || 'Erro ao salvar. Tente novamente.'
     }
-  } catch {
-    saveError.value = 'Erro ao salvar. Tente novamente.'
+  } catch (e: any) {
+    saveError.value = e?.data?.message || 'Erro ao salvar. Tente novamente.'
   } finally {
     saving.value = false
   }
@@ -526,8 +525,8 @@ async function saveCustomer() {
           Cancelar
         </button>
         <button
-          type="submit"
-          form="form-edit-customer"
+          type="button"
+          @click="saveCustomer"
           :disabled="saving"
           class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center gap-2"
         >
