@@ -17,6 +17,7 @@ const handleClientSelect = (client: any) => {
             endpoint="/api/customer/search"
             placeholder="Buscar cliente (Nome, CNPJ)..."
             label-key="officialName"
+            secondary-label-key="name"
             sub-label-key="document"
             @select="handleClientSelect"
         />

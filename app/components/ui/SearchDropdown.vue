@@ -6,6 +6,7 @@ const props = withDefaults(defineProps<{
   endpoint: string
   placeholder?: string
   labelKey?: string
+  secondaryLabelKey?: string
   subLabelKey?: string
   statusKey?: string
   activeStatusValue?: string
@@ -120,11 +121,14 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
               @click="selectItem(item)"
               class="p-3 hover:bg-blue-50 cursor-pointer transition-colors flex flex-col gap-0.5"
           >
-            <div class="flex justify-between items-center">
-              <span class="text-sm font-bold text-gray-900">{{ item[labelKey!] }}</span>
+            <div class="flex justify-between items-start">
+              <div class="flex flex-col gap-0.5">
+                <span class="text-sm font-bold text-gray-900">{{ item[labelKey!] }}</span>
+                <span v-if="secondaryLabelKey && item[secondaryLabelKey]" class="text-xs text-gray-600">{{ item[secondaryLabelKey] }}</span>
+              </div>
               <span
                   v-if="statusKey && item[statusKey]"
-                  class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full"
+                  class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shrink-0 ml-2"
                   :class="item[statusKey] === activeStatusValue ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
               >
                 {{ item[statusKey] }}
