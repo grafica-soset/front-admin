@@ -99,16 +99,14 @@ const form = reactive({
   sector: '',
   website: '',
   active: true,
-  // address — backend uses different field names on PUT vs GET
-  street: '',
+  address: '',
   number: '',
   complement: '',
-  neighborhood: '',
+  district: '',
   city: '',
   state: '',
-  zipcode: '',
+  postalcode: '',
   country: '',
-  // fiscal
   inscrest: '',
   inscrmun: '',
   inscrprodrur: '',
@@ -126,14 +124,13 @@ function openEditModal() {
   form.sector = c.sector ?? ''
   form.website = c.website ?? ''
   form.active = c.active ?? true
-  // GET uses address/district/postalcode, PUT expects street/neighborhood/zipcode
-  form.street = c.address ?? ''
+  form.address = c.address ?? ''
   form.number = c.number ?? ''
   form.complement = c.complement ?? ''
-  form.neighborhood = c.district ?? ''
+  form.district = c.district ?? ''
   form.city = c.city ?? ''
   form.state = c.state ?? ''
-  form.zipcode = c.postalcode ?? ''
+  form.postalcode = c.postalcode ?? ''
   form.country = c.country ?? ''
   form.inscrest = c.inscrest ?? ''
   form.inscrmun = c.inscrmun ?? ''
@@ -149,10 +146,32 @@ async function saveCustomer() {
   saving.value = true
   saveError.value = ''
   try {
+    const body = {
+      name:          form.name,
+      officialname:  form.officialname,
+      document:      form.document,
+      sector:        form.sector,
+      website:       form.website,
+      inscrest:      form.inscrest,
+      inscrmun:      form.inscrmun,
+      inscrprodrur:  form.inscrprodrur,
+      cei:           form.cei,
+      salespersonid: form.salespersonid,
+      accountantid:  form.accountantid,
+      active:        form.active,
+      address:       form.address,
+      number:        form.number,
+      complement:    form.complement,
+      district:      form.district,
+      city:          form.city,
+      state:         form.state,
+      postalcode:    form.postalcode,
+      country:       form.country,
+    }
     const res = await $fetch<any>(`/api/customer/${id}`, {
       method: 'PUT',
       query: { token: store.token },
-      body: { ...form },
+      body,
     })
     if (res.success) {
       await refreshCustomer()
@@ -259,7 +278,7 @@ async function saveCustomer() {
           <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Endereço</h3>
           <dl class="space-y-3">
             <div v-if="customer.address">
-              <dt class="text-xs text-gray-400">Logradouro</dt>
+              <dt class="text-xs text-gray-400">Endereço</dt>
               <dd class="text-sm text-gray-800">{{ customer.address }}<span v-if="customer.number">, {{ customer.number }}</span></dd>
             </div>
             <div v-if="customer.complement">
@@ -452,9 +471,10 @@ async function saveCustomer() {
           <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Endereço</legend>
           <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div class="form-group sm:col-span-3">
-              <label class="form-label">Logradouro</label>
-              <input v-model="form.street" type="text" class="form-input" />
+              <label class="form-label">Endereço</label>
+              <input v-model="form.address" type="text" class="form-input" />
             </div>
+            <!--
             <div class="form-group">
               <label class="form-label">Número</label>
               <input v-model="form.number" type="text" class="form-input" />
@@ -463,9 +483,10 @@ async function saveCustomer() {
               <label class="form-label">Complemento</label>
               <input v-model="form.complement" type="text" class="form-input" />
             </div>
+            -->
             <div class="form-group sm:col-span-2">
               <label class="form-label">Bairro</label>
-              <input v-model="form.neighborhood" type="text" class="form-input" />
+              <input v-model="form.district" type="text" class="form-input" />
             </div>
             <div class="form-group sm:col-span-2">
               <label class="form-label">Cidade</label>
@@ -477,11 +498,7 @@ async function saveCustomer() {
             </div>
             <div class="form-group">
               <label class="form-label">CEP</label>
-              <input v-model="form.zipcode" type="text" class="form-input font-mono" />
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">País</label>
-              <input v-model="form.country" type="text" class="form-input" />
+              <input v-model="form.postalcode" type="text" class="form-input font-mono" />
             </div>
           </div>
         </fieldset>
