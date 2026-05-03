@@ -33,6 +33,25 @@ const tradeName = computed(() => {
   return n && n !== o ? n : null
 })
 
+// ── Vendedores / Contadores ────────────────────────────────────────────────────
+const { data: vendedoresRes } = useFetch<any>('/api/salespersons/listagem', {
+  server: false,
+  query: computed(() => ({ token: store.token, size: 200 }))
+})
+
+const { data: contadoresRes } = useFetch<any>('/api/accountant/listagem', {
+  server: false,
+  query: computed(() => ({ token: store.token, size: 200 }))
+})
+
+const vendedoresOptions = computed(() =>
+  (vendedoresRes.value?.data?.items ?? []).map((v: any) => ({ id: v.id, label: `${v.firstName} ${v.lastName} (${v.personCode})` }))
+)
+
+const contadoresOptions = computed(() =>
+  (contadoresRes.value?.data?.items ?? []).map((c: any) => ({ id: c.id, label: c.name }))
+)
+
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 type Tab = 'informacoes' | 'contatos' | 'cores'
 const activeTab = ref<Tab>('informacoes')
@@ -87,7 +106,7 @@ function selectTab(tab: Tab) {
   if (tab === 'cores' && !inksLoaded.value) loadInks()
 }
 
-// ── Edit modal ────────────────────────────────────────────────────────────────
+// ── Edit customer modal ───────────────────────────────────────────────────────
 const showEditModal = ref(false)
 const saving = ref(false)
 const saveError = ref('')
@@ -146,32 +165,31 @@ async function saveCustomer() {
   saving.value = true
   saveError.value = ''
   try {
-    const body = {
-      name:          form.name,
-      officialname:  form.officialname,
-      document:      form.document,
-      sector:        form.sector,
-      website:       form.website,
-      inscrest:      form.inscrest,
-      inscrmun:      form.inscrmun,
-      inscrprodrur:  form.inscrprodrur,
-      cei:           form.cei,
-      salespersonid: form.salespersonid,
-      accountantid:  form.accountantid,
-      active:        form.active,
-      address:       form.address,
-      number:        form.number,
-      complement:    form.complement,
-      district:      form.district,
-      city:          form.city,
-      state:         form.state,
-      postalcode:    form.postalcode,
-      country:       form.country,
-    }
     const res = await $fetch<any>(`/api/customer/${id}`, {
       method: 'PUT',
       query: { token: store.token },
-      body,
+      body: {
+        name:          form.name,
+        officialname:  form.officialname,
+        document:      form.document,
+        sector:        form.sector,
+        website:       form.website,
+        inscrest:      form.inscrest,
+        inscrmun:      form.inscrmun,
+        inscrprodrur:  form.inscrprodrur,
+        cei:           form.cei,
+        salespersonid: form.salespersonid,
+        accountantid:  form.accountantid,
+        active:        form.active,
+        address:       form.address,
+        number:        form.number,
+        complement:    form.complement,
+        district:      form.district,
+        city:          form.city,
+        state:         form.state,
+        postalcode:    form.postalcode,
+        country:       form.country,
+      },
     })
     if (res.success) {
       await refreshCustomer()
@@ -183,6 +201,104 @@ async function saveCustomer() {
     saveError.value = e?.data?.message || 'Erro ao salvar. Tente novamente.'
   } finally {
     saving.value = false
+  }
+}
+
+// ── Add contact modal ─────────────────────────────────────────────────────────
+const showContactModal = ref(false)
+const savingContact = ref(false)
+const contactError = ref('')
+
+const contactForm = reactive({
+  firstName: '',
+  lastName: '',
+  jobTitle: '',
+  department: '',
+  email: '',
+  telephone1: '',
+  cellular: '',
+  comments: '',
+})
+
+function openContactModal() {
+  contactForm.firstName = ''
+  contactForm.lastName = ''
+  contactForm.jobTitle = ''
+  contactForm.department = ''
+  contactForm.email = ''
+  contactForm.telephone1 = ''
+  contactForm.cellular = ''
+  contactForm.comments = ''
+  contactError.value = ''
+  showContactModal.value = true
+}
+
+async function saveContact() {
+  if (!contactForm.firstName.trim()) {
+    contactError.value = 'Nome é obrigatório.'
+    return
+  }
+  savingContact.value = true
+  contactError.value = ''
+  try {
+    const res = await $fetch<any>(`/api/customer/${id}/contact`, {
+      method: 'POST',
+      query: { token: store.token },
+      body: contactForm,
+    })
+    if (res.success) {
+      showContactModal.value = false
+      await loadContacts(contactsPage.value)
+    } else {
+      contactError.value = res.message || 'Erro ao salvar contato.'
+    }
+  } catch (e: any) {
+    contactError.value = e?.data?.message || 'Erro ao salvar contato.'
+  } finally {
+    savingContact.value = false
+  }
+}
+
+// ── Add ink modal ─────────────────────────────────────────────────────────────
+const showInkModal = ref(false)
+const savingInk = ref(false)
+const inkError = ref('')
+
+const inkForm = reactive({
+  colorName: '',
+  pantoneCode: '',
+})
+
+function openInkModal() {
+  inkForm.colorName = ''
+  inkForm.pantoneCode = ''
+  inkError.value = ''
+  showInkModal.value = true
+}
+
+async function saveInk() {
+  if (!inkForm.colorName.trim()) {
+    inkError.value = 'Nome da cor é obrigatório.'
+    return
+  }
+  savingInk.value = true
+  inkError.value = ''
+  try {
+    const res = await $fetch<any>(`/api/customer/${id}/ink`, {
+      method: 'POST',
+      query: { token: store.token },
+      body: inkForm,
+    })
+    if (res.success) {
+      showInkModal.value = false
+      await loadInks(inksPage.value)
+    } else {
+      inkError.value = res.message || 'Erro ao salvar cor.'
+    }
+  } catch (e: any) {
+    inkError.value = e?.data?.message || 'Erro ao salvar cor.'
+  } finally {
+    savingInk.value = false
   }
 }
 </script>
@@ -342,6 +458,18 @@ async function saveCustomer() {
 
       <!-- Tab: Contatos -->
       <div v-if="activeTab === 'contatos'">
+        <div class="flex justify-end mb-4">
+          <button
+            @click="openContactModal"
+            class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Adicionar Contato
+          </button>
+        </div>
+
         <div v-if="contactsLoading" class="flex justify-center items-center py-16">
           <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -384,6 +512,18 @@ async function saveCustomer() {
 
       <!-- Tab: Cores -->
       <div v-if="activeTab === 'cores'">
+        <div class="flex justify-end mb-4">
+          <button
+            @click="openInkModal"
+            class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Adicionar Cor
+          </button>
+        </div>
+
         <div v-if="inksLoading" class="flex justify-center items-center py-16">
           <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -424,113 +564,18 @@ async function saveCustomer() {
       Cliente não encontrado.
     </div>
 
-    <!-- ── Modal de edição ───────────────────────────────────────────────────── -->
+    <!-- ── Modal editar cliente ──────────────────────────────────────────────── -->
     <UiModal :open="showEditModal" title="Editar Cliente" size="xl" @close="showEditModal = false">
-
       <form @submit.prevent="saveCustomer" id="form-edit-customer">
-
-        <!-- Dados Gerais -->
-        <fieldset class="mb-6">
-          <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Dados Gerais</legend>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">Razão Social</label>
-              <input v-model="form.officialname" type="text" class="form-input" />
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">Nome Fantasia</label>
-              <input v-model="form.name" type="text" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">CNPJ / CPF</label>
-              <input v-model="form.document" type="text" class="form-input font-mono" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Setor</label>
-              <input v-model="form.sector" type="text" class="form-input" />
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">Website</label>
-              <input v-model="form.website" type="url" class="form-input" placeholder="https://" />
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label class="form-checkbox-label cursor-pointer">
-                <div class="form-checkbox-container">
-                  <input v-model="form.active" type="checkbox" class="form-checkbox" />
-                </div>
-                <div class="form-checkbox-content">
-                  <span class="form-label">Cliente Ativo</span>
-                </div>
-              </label>
-            </div>
-          </div>
-        </fieldset>
-
-        <!-- Endereço -->
-        <fieldset class="mb-6">
-          <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Endereço</legend>
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="form-group sm:col-span-3">
-              <label class="form-label">Endereço</label>
-              <input v-model="form.address" type="text" class="form-input" />
-            </div>
-            <!--
-            <div class="form-group">
-              <label class="form-label">Número</label>
-              <input v-model="form.number" type="text" class="form-input" />
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">Complemento</label>
-              <input v-model="form.complement" type="text" class="form-input" />
-            </div>
-            -->
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">Bairro</label>
-              <input v-model="form.district" type="text" class="form-input" />
-            </div>
-            <div class="form-group sm:col-span-2">
-              <label class="form-label">Cidade</label>
-              <input v-model="form.city" type="text" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Estado</label>
-              <input v-model="form.state" type="text" class="form-input" maxlength="2" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">CEP</label>
-              <input v-model="form.postalcode" type="text" class="form-input font-mono" />
-            </div>
-          </div>
-        </fieldset>
-
-        <!-- Dados Fiscais -->
-        <fieldset>
-          <legend class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-100 w-full">Dados Fiscais</legend>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="form-group">
-              <label class="form-label">Inscrição Estadual</label>
-              <input v-model="form.inscrest" type="text" class="form-input font-mono" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Inscrição Municipal</label>
-              <input v-model="form.inscrmun" type="text" class="form-input font-mono" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Inscrição Prod. Rural</label>
-              <input v-model="form.inscrprodrur" type="text" class="form-input font-mono" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">CEI</label>
-              <input v-model="form.cei" type="text" class="form-input font-mono" />
-            </div>
-          </div>
-        </fieldset>
-
-        <!-- Erro -->
+        <FormsCustomerForm
+          :form="form"
+          mode="edit"
+          :vendedores-options="vendedoresOptions"
+          :contadores-options="contadoresOptions"
+        />
         <p v-if="saveError" class="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
           {{ saveError }}
         </p>
-
       </form>
 
       <template #footer>
@@ -554,7 +599,70 @@ async function saveCustomer() {
           {{ saving ? 'Salvando...' : 'Salvar' }}
         </button>
       </template>
+    </UiModal>
 
+    <!-- ── Modal adicionar contato ───────────────────────────────────────────── -->
+    <UiModal :open="showContactModal" title="Adicionar Contato" size="lg" @close="showContactModal = false">
+      <form @submit.prevent="saveContact">
+        <FormsContactForm :form="contactForm" mode="create" />
+        <p v-if="contactError" class="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+          {{ contactError }}
+        </p>
+      </form>
+
+      <template #footer>
+        <button
+          type="button"
+          @click="showContactModal = false"
+          class="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          @click="saveContact"
+          :disabled="savingContact"
+          class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center gap-2"
+        >
+          <svg v-if="savingContact" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ savingContact ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </template>
+    </UiModal>
+
+    <!-- ── Modal adicionar cor ───────────────────────────────────────────────── -->
+    <UiModal :open="showInkModal" title="Adicionar Cor" size="sm" @close="showInkModal = false">
+      <form @submit.prevent="saveInk">
+        <FormsInkForm :form="inkForm" mode="create" />
+        <p v-if="inkError" class="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+          {{ inkError }}
+        </p>
+      </form>
+
+      <template #footer>
+        <button
+          type="button"
+          @click="showInkModal = false"
+          class="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          @click="saveInk"
+          :disabled="savingInk"
+          class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center gap-2"
+        >
+          <svg v-if="savingInk" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ savingInk ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </template>
     </UiModal>
 
   </div>
