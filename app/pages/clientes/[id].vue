@@ -204,33 +204,72 @@ async function saveCustomer() {
   }
 }
 
-// ── Add contact modal ─────────────────────────────────────────────────────────
+// ── Contact modal (create + edit) ─────────────────────────────────────────────
 const showContactModal = ref(false)
+const editingContactId = ref<number | null>(null)
+const loadingContact = ref(false)
 const savingContact = ref(false)
 const contactError = ref('')
 
 const contactForm = reactive({
-  firstName: '',
-  lastName: '',
-  jobTitle: '',
+  firstName:  '',
+  lastName:   '',
+  jobTitle:   '',
   department: '',
-  email: '',
+  email:      '',
   telephone1: '',
-  cellular: '',
-  comments: '',
+  telephone2: '',
+  cellular:   '',
+  fax:        '',
+  extension1: '',
+  extension2: '',
+  address:    '',
+  district:   '',
+  city:       '',
+  zipcode:    '',
+  comments:   '',
 })
 
-function openContactModal() {
-  contactForm.firstName = ''
-  contactForm.lastName = ''
-  contactForm.jobTitle = ''
-  contactForm.department = ''
-  contactForm.email = ''
-  contactForm.telephone1 = ''
-  contactForm.cellular = ''
-  contactForm.comments = ''
+function fillContactForm(c: any) {
+  contactForm.firstName   = c?.firstName  ?? ''
+  contactForm.lastName    = c?.lastName   ?? ''
+  contactForm.jobTitle    = c?.jobTitle   ?? ''
+  contactForm.department  = c?.department ?? ''
+  contactForm.email       = c?.email      ?? ''
+  contactForm.telephone1  = c?.telephone1 ?? ''
+  contactForm.telephone2  = c?.telephone2 ?? ''
+  contactForm.cellular    = c?.cellular   ?? ''
+  contactForm.fax         = c?.fax        ?? ''
+  contactForm.extension1  = c?.extension1 != null ? String(c.extension1) : ''
+  contactForm.extension2  = c?.extension2 != null ? String(c.extension2) : ''
+  contactForm.address     = c?.address    ?? ''
+  contactForm.district    = c?.district   ?? ''
+  contactForm.city        = c?.city       ?? ''
+  contactForm.zipcode     = c?.zipcode    ?? ''
+  contactForm.comments    = c?.comments   ?? ''
+}
+
+async function openContactModal(contact?: any) {
+  editingContactId.value = contact?.id ?? null
   contactError.value = ''
-  showContactModal.value = true
+
+  if (contact?.id) {
+    loadingContact.value = true
+    showContactModal.value = true
+    try {
+      const res = await $fetch<any>(`/api/customer/${id}/contact/${contact.id}`, {
+        query: { token: store.token }
+      })
+      fillContactForm(res.data ?? res)
+    } catch {
+      contactError.value = 'Erro ao carregar dados do contato.'
+    } finally {
+      loadingContact.value = false
+    }
+  } else {
+    fillContactForm(null)
+    showContactModal.value = true
+  }
 }
 
 async function saveContact() {
@@ -241,8 +280,12 @@ async function saveContact() {
   savingContact.value = true
   contactError.value = ''
   try {
-    const res = await $fetch<any>(`/api/customer/${id}/contact`, {
-      method: 'POST',
+    const isEdit = editingContactId.value !== null
+    const url = isEdit
+      ? `/api/customer/${id}/contact/${editingContactId.value}`
+      : `/api/customer/${id}/contact`
+    const res = await $fetch<any>(url, {
+      method: isEdit ? 'PUT' : 'POST',
       query: { token: store.token },
       body: contactForm,
     })
@@ -259,8 +302,9 @@ async function saveContact() {
   }
 }
 
-// ── Add ink modal ─────────────────────────────────────────────────────────────
+// ── Ink modal (create + edit) ─────────────────────────────────────────────────
 const showInkModal = ref(false)
+const editingInkId = ref<number | null>(null)
 const savingInk = ref(false)
 const inkError = ref('')
 
@@ -269,9 +313,10 @@ const inkForm = reactive({
   pantoneCode: '',
 })
 
-function openInkModal() {
-  inkForm.colorName = ''
-  inkForm.pantoneCode = ''
+function openInkModal(ink?: any) {
+  editingInkId.value  = ink?.id ?? null
+  inkForm.colorName   = ink?.colorName   ?? ''
+  inkForm.pantoneCode = ink?.pantoneCode ?? ''
   inkError.value = ''
   showInkModal.value = true
 }
@@ -284,8 +329,12 @@ async function saveInk() {
   savingInk.value = true
   inkError.value = ''
   try {
-    const res = await $fetch<any>(`/api/customer/${id}/ink`, {
-      method: 'POST',
+    const isEdit = editingInkId.value !== null
+    const url = isEdit
+      ? `/api/customer/${id}/ink/${editingInkId.value}`
+      : `/api/customer/${id}/ink`
+    const res = await $fetch<any>(url, {
+      method: isEdit ? 'PUT' : 'POST',
       query: { token: store.token },
       body: inkForm,
     })
@@ -488,6 +537,7 @@ async function saveInk() {
                   <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Cargo</th>
                   <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">E-mail</th>
                   <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Telefone</th>
+                  <th class="px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -498,6 +548,14 @@ async function saveInk() {
                   <td class="px-6 py-4 text-gray-600">{{ contact.jobTitle || '—' }}</td>
                   <td class="px-6 py-4 text-gray-600">{{ contact.email || '—' }}</td>
                   <td class="px-6 py-4 text-gray-600 font-mono">{{ contact.telephone1 || '—' }}</td>
+                  <td class="px-6 py-4 text-right">
+                    <button
+                      @click="openContactModal(contact)"
+                      class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                    >
+                      Editar
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -540,12 +598,21 @@ async function saveInk() {
                 <tr>
                   <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Nome da Cor</th>
                   <th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Código Pantone</th>
+                  <th class="px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
                 <tr v-for="ink in inks" :key="ink.id" class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 font-medium text-gray-900">{{ ink.colorName || '—' }}</td>
                   <td class="px-6 py-4 text-gray-600 font-mono">{{ ink.pantoneCode || '—' }}</td>
+                  <td class="px-6 py-4 text-right">
+                    <button
+                      @click="openInkModal(ink)"
+                      class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                    >
+                      Editar
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -602,9 +669,15 @@ async function saveInk() {
     </UiModal>
 
     <!-- ── Modal adicionar contato ───────────────────────────────────────────── -->
-    <UiModal :open="showContactModal" title="Adicionar Contato" size="lg" @close="showContactModal = false">
-      <form @submit.prevent="saveContact">
-        <FormsContactForm :form="contactForm" mode="create" />
+    <UiModal :open="showContactModal" :title="editingContactId ? 'Editar Contato' : 'Adicionar Contato'" size="lg" @close="showContactModal = false">
+      <div v-if="loadingContact" class="flex justify-center items-center py-12">
+        <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <form v-else @submit.prevent="saveContact">
+        <FormsContactForm :form="contactForm" :mode="editingContactId ? 'edit' : 'create'" />
         <p v-if="contactError" class="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
           {{ contactError }}
         </p>
@@ -634,7 +707,7 @@ async function saveInk() {
     </UiModal>
 
     <!-- ── Modal adicionar cor ───────────────────────────────────────────────── -->
-    <UiModal :open="showInkModal" title="Adicionar Cor" size="sm" @close="showInkModal = false">
+    <UiModal :open="showInkModal" :title="editingInkId ? 'Editar Cor' : 'Adicionar Cor'" size="sm" @close="showInkModal = false">
       <form @submit.prevent="saveInk">
         <FormsInkForm :form="inkForm" mode="create" />
         <p v-if="inkError" class="mt-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
