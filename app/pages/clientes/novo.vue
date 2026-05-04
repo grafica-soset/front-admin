@@ -45,24 +45,6 @@ watch(tipoPessoa, () => {
 const submitting = ref(false)
 const erro = ref('')
 
-const { data: vendedoresRes } = useFetch<any>('/api/salespersons/listagem', {
-  server: false,
-  query: computed(() => ({ token: session.token, size: 200 }))
-})
-
-const { data: contadoresRes } = useFetch<any>('/api/accountant/listagem', {
-  server: false,
-  query: computed(() => ({ token: session.token, size: 200 }))
-})
-
-const vendedoresOptions = computed(() =>
-  (vendedoresRes.value?.data?.items ?? []).map((v: any) => ({ id: v.id, label: `${v.firstName} ${v.lastName} (${v.personCode})` }))
-)
-
-const contadoresOptions = computed(() =>
-  (contadoresRes.value?.data?.items ?? []).map((c: any) => ({ id: c.id, label: c.name }))
-)
-
 async function salvar() {
   if (!form.document.trim()) {
     erro.value = tipoPessoa.value === 'pj' ? 'CNPJ é obrigatório.' : 'CPF é obrigatório.'
@@ -143,8 +125,6 @@ async function salvar() {
         :form="form"
         mode="create"
         v-model:tipoPessoa="tipoPessoa"
-        :vendedores-options="vendedoresOptions"
-        :contadores-options="contadoresOptions"
       />
 
       <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">

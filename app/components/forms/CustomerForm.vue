@@ -8,6 +8,14 @@ const props = defineProps<{
 
 const tipoPessoa = defineModel<'pj' | 'pf'>('tipoPessoa', { default: 'pj' })
 
+// Labels iniciais para modo edição (resolvidos a partir das options do pai)
+const salespersonLabel = computed(() =>
+  props.vendedoresOptions?.find(v => v.id === props.form.salespersonid)?.label ?? ''
+)
+const accountantLabel = computed(() =>
+  props.contadoresOptions?.find(c => c.id === props.form.accountantid)?.label ?? ''
+)
+
 const buscandoCep = ref(false)
 
 async function buscarCep() {
@@ -117,20 +125,20 @@ async function buscarCep() {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Vendedor</label>
-          <UiCombobox
+          <UiPersonField
             v-model="form.salespersonid"
-            :options="vendedoresOptions ?? []"
-            placeholder="Buscar vendedor..."
-            :min-chars="0"
+            endpoint="/api/salespersons/list"
+            placeholder="Buscar vendedor pelo nome..."
+            :initial-label="salespersonLabel"
           />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Contador</label>
-          <UiCombobox
+          <UiPersonField
             v-model="form.accountantid"
-            :options="contadoresOptions ?? []"
-            placeholder="Digite ao menos 3 caracteres..."
-            :min-chars="3"
+            endpoint="/api/accountant/list"
+            placeholder="Buscar contador pelo nome..."
+            :initial-label="accountantLabel"
           />
         </div>
       </div>
@@ -238,20 +246,20 @@ async function buscarCep() {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="form-group">
           <label class="form-label">Vendedor</label>
-          <UiCombobox
+          <UiPersonField
             v-model="form.salespersonid"
-            :options="vendedoresOptions ?? []"
-            placeholder="Buscar vendedor..."
-            :min-chars="0"
+            endpoint="/api/salespersons/list"
+            placeholder="Buscar vendedor pelo nome..."
+            :initial-label="salespersonLabel"
           />
         </div>
         <div class="form-group">
           <label class="form-label">Contador</label>
-          <UiCombobox
+          <UiPersonField
             v-model="form.accountantid"
-            :options="contadoresOptions ?? []"
-            placeholder="Digite ao menos 3 caracteres..."
-            :min-chars="3"
+            endpoint="/api/accountant/list"
+            placeholder="Buscar contador pelo nome..."
+            :initial-label="accountantLabel"
           />
         </div>
       </div>
