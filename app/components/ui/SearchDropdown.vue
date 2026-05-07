@@ -11,6 +11,8 @@ const props = withDefaults(defineProps<{
   statusKey?: string
   activeStatusValue?: string
   resultKey?: string
+  cityKey?: string
+  stateKey?: string
 }>(), {
   placeholder: 'Buscar...',
   labelKey: 'name',
@@ -135,6 +137,9 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
               </span>
             </div>
             <span v-if="subLabelKey" class="text-xs text-gray-500 font-mono">{{ item[subLabelKey] }}</span>
+            <span v-if="cityKey && item[cityKey]" class="text-xs text-gray-400">
+              {{ item[cityKey] }}{{ stateKey && item[stateKey!] ? ' / ' + item[stateKey!] : '' }}
+            </span>
           </li>
         </ul>
 
