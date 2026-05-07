@@ -19,6 +19,8 @@ const handleClientSelect = (client: any) => {
             label-key="officialName"
             secondary-label-key="name"
             sub-label-key="document"
+            city-key="city"
+            state-key="state"
             @select="handleClientSelect"
         />
       </div>
