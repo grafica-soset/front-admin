@@ -15,5 +15,9 @@ defineProps<{
       <label class="form-label">Código Pantone</label>
       <input v-model="form.pantoneCode" type="text" class="form-input font-mono" placeholder="Ex: Pantone 2955 C" />
     </div>
+    <div class="form-group">
+      <label class="form-label">Cor formulada</label>
+      <input v-model="form.formulatedColor" type="text" class="form-input" maxlength="100" placeholder="Ex: 70% Ciano + 30% Magenta" />
+    </div>
   </div>
 </template>
