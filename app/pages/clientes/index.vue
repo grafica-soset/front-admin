@@ -1,6 +1,113 @@
 <script setup lang="ts">
+import { sessionStore as useSessionStore } from '~/stores/sessionStore'
+
+const session = useSessionStore()
+
 const handleClientSelect = (client: any) => {
   navigateTo(`/clientes/${client.id}`)
+}
+
+const showCustomerModal = ref(false)
+const tipoPessoa = ref<'pj' | 'pf'>('pj')
+const submittingCustomer = ref(false)
+const customerError = ref('')
+
+function getInitialCustomerForm() {
+  return {
+    document: '',
+    officialname: '',
+    name: '',
+    sector: '',
+    website: '',
+    inscrest: '',
+    inscrmun: '',
+    inscrprodrur: '',
+    cei: '',
+    salespersonid: null as number | null,
+    accountantid: null as number | null,
+    postalcode: '',
+    address: '',
+    number: '',
+    complement: '',
+    district: '',
+    city: '',
+    state: '',
+  }
+}
+
+const customerForm = reactive(getInitialCustomerForm())
+
+watch(tipoPessoa, () => {
+  customerForm.name = ''
+  customerForm.inscrest = ''
+  customerForm.inscrmun = ''
+  customerForm.inscrprodrur = ''
+})
+
+function openCustomerModal() {
+  Object.assign(customerForm, getInitialCustomerForm())
+  tipoPessoa.value = 'pj'
+  customerError.value = ''
+  showCustomerModal.value = true
+}
+
+function closeCustomerModal() {
+  showCustomerModal.value = false
+}
+
+async function saveCustomer() {
+  if (!customerForm.document.trim()) {
+    customerError.value = tipoPessoa.value === 'pj' ? 'CNPJ é obrigatório.' : 'CPF é obrigatório.'
+    return
+  }
+  if (!customerForm.officialname.trim()) {
+    customerError.value = tipoPessoa.value === 'pj' ? 'Razão Social é obrigatória.' : 'Nome Completo é obrigatório.'
+    return
+  }
+
+  submittingCustomer.value = true
+  customerError.value = ''
+
+  try {
+    const res = await $fetch<any>('/api/customer/cadastro', {
+      method: 'POST',
+      query: { token: session.token },
+      body: {
+        document:      customerForm.document,
+        officialname:  customerForm.officialname,
+        name:          customerForm.name || null,
+        sector:        customerForm.sector || null,
+        website:       customerForm.website || null,
+        inscrest:      customerForm.inscrest || null,
+        inscrmun:      customerForm.inscrmun || null,
+        inscrprodrur:  customerForm.inscrprodrur || null,
+        cei:           customerForm.cei || null,
+        salespersonid: customerForm.salespersonid || null,
+        accountantid:  customerForm.accountantid || null,
+        postalcode:    customerForm.postalcode || null,
+        address:       customerForm.address || null,
+        number:        customerForm.number || null,
+        complement:    customerForm.complement || null,
+        district:      customerForm.district || null,
+        city:          customerForm.city || null,
+        state:         customerForm.state || null,
+      }
+    })
+
+    if (res.success) {
+      closeCustomerModal()
+      const createdId = res.data?.id
+      if (createdId) {
+        await navigateTo(`/clientes/${createdId}`)
+      }
+    } else {
+      customerError.value = res.message ?? 'Erro ao cadastrar cliente.'
+    }
+  } catch (e: any) {
+    customerError.value = e?.data?.message || 'Erro ao cadastrar cliente.'
+  } finally {
+    submittingCustomer.value = false
+  }
 }
 </script>
 <template>
@@ -119,7 +226,11 @@ const handleClientSelect = (client: any) => {
         <h3 class="text-base font-bold text-gray-800 mb-4">Ações Rápidas</h3>
         <div class="flex flex-col gap-3 flex-grow justify-center">
 
-          <button class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+          <button
+            type="button"
+            @click="openCustomerModal"
+            class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -144,6 +255,41 @@ const handleClientSelect = (client: any) => {
       </div>
 
     </section>
+
+    <UiModal :open="showCustomerModal" title="Novo Cliente" size="xl" @close="closeCustomerModal">
+      <form @submit.prevent="saveCustomer">
+        <FormsCustomerForm
+          :form="customerForm"
+          mode="create"
+          v-model:tipoPessoa="tipoPessoa"
+        />
+        <p v-if="customerError" class="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+          {{ customerError }}
+        </p>
+      </form>
+
+      <template #footer>
+        <button
+          type="button"
+          @click="closeCustomerModal"
+          class="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          @click="saveCustomer"
+          :disabled="submittingCustomer"
+          class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center gap-2"
+        >
+          <svg v-if="submittingCustomer" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ submittingCustomer ? 'Salvando...' : 'Salvar Cliente' }}
+        </button>
+      </template>
+    </UiModal>
 
   </div>
 </template>
