@@ -311,12 +311,14 @@ const inkError = ref('')
 const inkForm = reactive({
   colorName: '',
   pantoneCode: '',
+  formulatedColor: '',
 })
 
 function openInkModal(ink?: any) {
   editingInkId.value  = ink?.id ?? null
-  inkForm.colorName   = ink?.colorName   ?? ''
-  inkForm.pantoneCode = ink?.pantoneCode ?? ''
+  inkForm.colorName       = ink?.colorName       ?? ''
+  inkForm.pantoneCode     = ink?.pantoneCode     ?? ''
+  inkForm.formulatedColor = ink?.formulatedColor ?? ''
   inkError.value = ''
   showInkModal.value = true
 }
